@@ -53,8 +53,8 @@
                         </p>
 
                         <a
-                            href="/login"
-                            class="btn btn-primary w-100"
+                            href="/courses/<?= (int) $course['id'] ?>/apply"
+                            class="btn btn-primary"
                         >
                             Записаться на курс
                         </a>

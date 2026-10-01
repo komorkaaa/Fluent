@@ -57,3 +57,22 @@ INSERT INTO courses (
           'Очно',
           'Испанский'
       );
+
+CREATE TABLE applications (
+                              id BIGSERIAL PRIMARY KEY,
+
+                              course_id BIGINT NOT NULL,
+                              name VARCHAR(255) NOT NULL,
+                              phone VARCHAR(50) NOT NULL,
+                              email VARCHAR(255) NOT NULL,
+                              comment TEXT,
+
+                              status VARCHAR(50) NOT NULL DEFAULT 'Новая',
+
+                              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                              CONSTRAINT fk_applications_course
+                                  FOREIGN KEY (course_id)
+                                      REFERENCES courses(id)
+                                      ON DELETE RESTRICT
+);
