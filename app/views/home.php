@@ -1,16 +1,28 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
 
-    <title><?= htmlspecialchars($title) ?></title>
-</head>
-<body>
+            <div class="col-lg-7">
+                <span class="badge text-bg-primary mb-3">
+                    Fluent
+                </span>
 
-<h1><?= htmlspecialchars($title) ?></h1>
+                <h1 class="display-4 fw-bold">
+                    Изучайте иностранные языки
+                </h1>
 
-<p>Центр изучения иностранных языков.</p>
+                <p class="lead text-body-secondary mt-3">
+                    Курсы английского и других иностранных языков
+                    с преподавателями и удобным расписанием.
+                </p>
 
-</body>
-</html>
+                <div class="mt-4">
+                    <a href="/courses" class="btn btn-primary btn-lg">
+                        Посмотреть курсы
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
