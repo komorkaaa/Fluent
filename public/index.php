@@ -1,15 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../app/core/Router.php';
-require_once __DIR__ . '/../app/core/Controller.php';
-require_once __DIR__ . '/../app/controllers/HomeController.php';
+require_once __DIR__ . '/../app/core/autoload.php';
 
 use App\Core\Router;
-use App\Controllers\HomeController;
 
 $router = new Router();
 
-$router->get('/', [HomeController::class, 'index']);
+require_once __DIR__ . '/../routes/web.php';
 
 $router->dispatch(
     $_SERVER['REQUEST_METHOD'],
