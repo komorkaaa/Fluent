@@ -6,12 +6,27 @@ use App\Core\Controller;
 use App\Models\Course;
 
 class CoursesController extends Controller {
-    public function index(): void {
-        $courses = Course::all();
+    public function index(): void
+    {
+        $language = $_GET['language'] ?? null;
+        $level = $_GET['level'] ?? null;
+        $format = $_GET['format'] ?? null;
+        $sort = $_GET['sort'] ?? 'date_desc';
+
+        $courses = Course::all(
+            $language,
+            $level,
+            $format,
+            $sort
+        );
 
         $this->view('courses/index', [
-            'title' => 'Курсы – Fluent',
+            'title' => 'Курсы — Fluent',
             'courses' => $courses,
+            'language' => $language,
+            'level' => $level,
+            'format' => $format,
+            'sort' => $sort,
         ]);
     }
 

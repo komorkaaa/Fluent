@@ -11,6 +11,164 @@
             </p>
         </div>
 
+        <div class="card mb-5">
+            <div class="card-body">
+
+                <h2 class="h5 mb-4">
+                    Фильтры и сортировка
+                </h2>
+
+                <form method="GET" action="/courses">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label for="language" class="form-label">
+                                Язык
+                            </label>
+
+                            <select
+                                name="language"
+                                id="language"
+                                class="form-select"
+                            >
+                                <option value="">Все языки</option>
+
+                                <option
+                                    value="Английский"
+                                    <?= $language === 'Английский' ? 'selected' : '' ?>
+                                >
+                                    Английский
+                                </option>
+
+                                <option
+                                    value="Немецкий"
+                                    <?= $language === 'Немецкий' ? 'selected' : '' ?>
+                                >
+                                    Немецкий
+                                </option>
+
+                                <option
+                                    value="Испанский"
+                                    <?= $language === 'Испанский' ? 'selected' : '' ?>
+                                >
+                                    Испанский
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="level" class="form-label">
+                                Уровень
+                            </label>
+
+                            <select
+                                name="level"
+                                id="level"
+                                class="form-select"
+                            >
+                                <option value="">Все уровни</option>
+
+                                <option
+                                    value="Начальный"
+                                    <?= $level === 'Начальный' ? 'selected' : '' ?>
+                                >
+                                    Начальный
+                                </option>
+
+                                <option
+                                    value="Средний"
+                                    <?= $level === 'Средний' ? 'selected' : '' ?>
+                                >
+                                    Средний
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="format" class="form-label">
+                                Формат
+                            </label>
+
+                            <select
+                                name="format"
+                                id="format"
+                                class="form-select"
+                            >
+                                <option value="">Любой формат</option>
+
+                                <option
+                                    value="Онлайн"
+                                    <?= $format === 'Онлайн' ? 'selected' : '' ?>
+                                >
+                                    Онлайн
+                                </option>
+
+                                <option
+                                    value="Очно"
+                                    <?= $format === 'Очно' ? 'selected' : '' ?>
+                                >
+                                    Очно
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label for="sort" class="form-label">
+                                Сортировка
+                            </label>
+
+                            <select
+                                name="sort"
+                                id="sort"
+                                class="form-select"
+                            >
+                                <option
+                                    value="date_desc"
+                                    <?= $sort === 'date_desc' ? 'selected' : '' ?>
+                                >
+                                    Сначала новые
+                                </option>
+
+                                <option
+                                    value="price_asc"
+                                    <?= $sort === 'price_asc' ? 'selected' : '' ?>
+                                >
+                                    Цена: по возрастанию
+                                </option>
+
+                                <option
+                                    value="price_desc"
+                                    <?= $sort === 'price_desc' ? 'selected' : '' ?>
+                                >
+                                    Цена: по убыванию
+                                </option>
+
+                                <option
+                                    value="name_asc"
+                                    <?= $sort === 'name_asc' ? 'selected' : '' ?>
+                                >
+                                    По названию
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button
+                                type="submit"
+                                class="btn btn-primary w-100"
+                            >
+                                Применить
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
         <div class="row g-4">
 
             <?php foreach ($courses as $course): ?>
@@ -65,6 +223,12 @@
             <?php endforeach; ?>
 
         </div>
+
+        <?php if ($courses === []): ?>
+            <div class="alert alert-secondary mt-4">
+                По выбранным параметрам курсы не найдены.
+            </div>
+        <?php endif; ?>
 
     </div>
 </section>
