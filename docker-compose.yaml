@@ -6,6 +6,12 @@ services:
     container_name: fluent-php
     volumes:
       - ./:/var/www/html
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: fluent
+      DB_USER: fluent
+      DB_PASSWORD: fluent
     networks:
       - fluent
 

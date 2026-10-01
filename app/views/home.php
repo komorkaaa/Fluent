@@ -26,3 +26,11 @@
         </div>
     </div>
 </section>
+
+<?php if ($databaseConnected): ?>
+    <div class="container pb-5">
+        <div class="alert alert-success">
+            PostgreSQL подключён.
+        </div>
+    </div>
+<?php endif; ?>
