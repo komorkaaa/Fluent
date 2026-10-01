@@ -76,3 +76,29 @@ CREATE TABLE applications (
                                       REFERENCES courses(id)
                                       ON DELETE RESTRICT
 );
+
+CREATE TABLE roles (
+                       id BIGSERIAL PRIMARY KEY,
+                       name VARCHAR(50) NOT NULL UNIQUE
+);
+
+INSERT INTO roles (name) VALUES
+                             ('user'),
+                             ('admin');
+
+CREATE TABLE users (
+                       id BIGSERIAL PRIMARY KEY,
+
+                       role_id BIGINT NOT NULL,
+
+                       name VARCHAR(255) NOT NULL,
+                       email VARCHAR(255) NOT NULL UNIQUE,
+                       password VARCHAR(255) NOT NULL,
+
+                       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                       CONSTRAINT fk_users_role
+                           FOREIGN KEY (role_id)
+                               REFERENCES roles(id)
+                               ON DELETE RESTRICT
+);

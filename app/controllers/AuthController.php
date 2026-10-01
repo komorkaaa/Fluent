@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Core\Controller;
+use App\Models\User;
+use App\Core\Auth;
+
+class AuthController extends Controller {
+    public function register(): void {
+        $this->view('auth/register', [
+            'title' => 'Регистрация — Fluent',
+        ]);
+    }
+
+    public function storeRegister(): void {
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $passwordConfirmation = $_POST['password_confirmation'] ?? '';
+
+        $errors = [];
+
+        if ($name === '') {
+            $errors[] = 'Введите имя.';
+        }
+
+        if ($email === '') {
+            $errors[] = 'Введите email.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Введите корректный email.';
+        }
+
+        if ($password === '') {
+            $errors[] = 'Введите пароль.';
+        } elseif (strlen($password) < 6) {
+            $errors[] = 'Пароль должен содержать минимум 6 символов.';
+        }
+
+        if ($password !== $passwordConfirmation) {
+            $errors[] = 'Пароли не совпадают.';
+        }
+
+        if (User::findByEmail($email) !== null) {
+            $errors[] = 'Пользователь с таким email уже зарегистрирован.';
+        }
+
+        if ($errors !== []) {
+            $this->view('auth/register', [
+                'title' => 'Регистрация — Fluent',
+                'errors' => $errors,
+                'old' => [
+                    'name' => $name,
+                    'email' => $email,
+                ],
+            ]);
+
+            return;
+        }
+
+        User::create(
+            $name,
+            $email,
+            $password
+        );
+
+        header('Location: /login');
+        exit;
+    }
+
+    public function login(): void
+    {
+        $this->view('auth/login', [
+            'title' => 'Вход — Fluent',
+        ]);
+    }
+
+    public function storeLogin(): void {
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        $errors = [];
+
+        if ($email === '') {
+            $errors[] = 'Введите email.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Введите корректный email.';
+        }
+
+        if ($password === '') {
+            $errors[] = 'Введите пароль.';
+        }
+
+        $user = null;
+
+        if ($errors === []) {
+            $user = User::findByEmail($email);
+
+            if (
+                $user === null ||
+                !password_verify($password, $user['password'])
+            ) {
+                $errors[] = 'Неверный email или пароль.';
+            }
+        }
+
+        if ($errors !== []) {
+            $this->view('auth/login', [
+                'title' => 'Вход — Fluent',
+                'errors' => $errors,
+                'old' => [
+                    'email' => $email,
+                ],
+            ]);
+
+            return;
+        }
+
+        Auth::login($user);
+
+        header('Location: /');
+        exit;
+    }
+
+    public function logout(): void {
+        Auth::logout();
+
+        header('Location: /');
+        exit;
+    }
+}
