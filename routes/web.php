@@ -10,6 +10,7 @@ use App\Controllers\AdminCoursesController;
 use App\Controllers\AdminApplicationsController;
 use App\Controllers\AdminUsersController;
 use App\Controllers\PagesController;
+use App\Controllers\ErrorController;
 
 $router->get('/', [HomeController::class, 'index']);
 

@@ -1,21 +1,24 @@
-<section class="py-5">
-    <div class="container text-center">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 text-center">
 
-        <h1 class="display-1 fw-bold">
-            404
-        </h1>
+            <div class="display-1 fw-bold text-primary mb-3">
+                404
+            </div>
 
-        <h2 class="mb-3">
-            Страница не найдена
-        </h2>
+            <h1 class="h2 mb-3">
+                Страница не найдена
+            </h1>
 
-        <p class="text-body-secondary mb-4">
-            Запрашиваемый курс или страница не существуют.
-        </p>
+            <p class="text-muted mb-4">
+                К сожалению, запрашиваемая страница не существует
+                или была перемещена.
+            </p>
 
-        <a href="/courses" class="btn btn-primary">
-            Вернуться к курсам
-        </a>
+            <a href="/" class="btn btn-primary">
+                Вернуться на главную
+            </a>
 
+        </div>
     </div>
-</section>
+</div>
