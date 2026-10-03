@@ -9,6 +9,7 @@ use App\Controllers\AdminDashboardController;
 use App\Controllers\AdminCoursesController;
 use App\Controllers\AdminApplicationsController;
 use App\Controllers\AdminUsersController;
+use App\Controllers\PagesController;
 
 $router->get('/', [HomeController::class, 'index']);
 
@@ -18,14 +19,12 @@ $router->get('/courses/{id}', [CoursesController::class, 'show']);
 $router->get('/courses/{id}/apply', [ApplicationsController::class, 'create']);
 $router->post('/courses/{id}/apply', [ApplicationsController::class, 'store']);
 
-
 // ====== auth ======
 $router->get('/register', [AuthController::class, 'register']);
 $router->post('/register', [AuthController::class, 'storeRegister']);
 $router->get('/login', [AuthController::class, 'login']);
 $router->post('/login', [AuthController::class, 'storeLogin']);
 $router->post('/logout', [AuthController::class, 'logout']);
-
 
 // ====== profile ======
 $router->get('/profile', [ProfileController::class, 'index']);
@@ -44,3 +43,8 @@ $router->post('/admin/applications/{id}/status', [AdminApplicationsController::c
 $router->post('/admin/applications/{id}/delete', [AdminApplicationsController::class, 'delete']);
 $router->get('/admin/users', [AdminUsersController::class, 'index']);
 $router->post('/admin/users/{id}/role', [AdminUsersController::class, 'updateRole']);
+
+// ====== other ======
+$router->get('/about', [PagesController::class, 'about']);
+$router->get('/contacts', [PagesController::class, 'contacts']);
+$router->get('/privacy', [PagesController::class, 'privacy']);

@@ -5,9 +5,11 @@ use App\Core\Auth;
 Auth::start();
 
 $user = Auth::user();
+
 ?>
 
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -16,22 +18,25 @@ $user = Auth::user();
     <title><?= htmlspecialchars($title ?? 'Fluent') ?></title>
 
     <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+            rel="stylesheet"
     >
 
     <link
-        rel="stylesheet"
-        href="/css/style.css"
+            rel="stylesheet"
+            href="/css/style.css"
     >
+
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
 
 <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">Fluent</a>
+            <a class="navbar-brand fw-bold" href="/">
+                Fluent
+            </a>
 
             <button
                     class="navbar-toggler"
@@ -48,22 +53,37 @@ $user = Auth::user();
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Главная</a>
+                        <a class="nav-link" href="/">
+                            Главная
+                        </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/courses">Курсы</a>
+                        <a class="nav-link" href="/courses">
+                            Курсы
+                        </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/contacts">Контакты</a>
+                        <a class="nav-link" href="/about">
+                            О компании
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contacts">
+                            Контакты
+                        </a>
                     </li>
                 </ul>
 
                 <ul class="navbar-nav">
                     <?php if ($user === null): ?>
+
                         <li class="nav-item">
-                            <a class="nav-link" href="/login">Войти</a>
+                            <a class="nav-link" href="/login">
+                                Войти
+                            </a>
                         </li>
 
                         <li class="nav-item">
@@ -71,12 +91,22 @@ $user = Auth::user();
                                 Регистрация
                             </a>
                         </li>
+
                     <?php else: ?>
+
                         <li class="nav-item">
                             <a class="nav-link" href="/profile">
                                 <?= htmlspecialchars($user['name']) ?>
                             </a>
                         </li>
+
+                        <?php if (($user['role'] ?? null) === 'admin'): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin">
+                                    Админ-панель
+                                </a>
+                            </li>
+                        <?php endif; ?>
 
                         <li class="nav-item">
                             <form method="POST" action="/logout" class="d-inline">
@@ -88,25 +118,51 @@ $user = Auth::user();
                                 </button>
                             </form>
                         </li>
+
                     <?php endif; ?>
                 </ul>
             </div>
         </div>
     </nav>
+
 </header>
 
-<main>
+<main class="flex-grow-1">
     <?= $content ?>
 </main>
 
-<footer class="border-top mt-5 py-4">
-    <div class="container text-center text-body-secondary">
-        © <?= date('Y') ?> Fluent
+<footer class="border-top mt-5 py-4 bg-body-tertiary">
+    <div class="container">
+        <div class="row align-items-center g-3">
+            <div class="col-md-6">
+                <div class="fw-bold">
+                    Fluent
+                </div>
+
+                <div class="text-body-secondary small">
+                    Центр изучения иностранных языков
+                </div>
+            </div>
+
+            <div class="col-md-6 text-md-end">
+                <a
+                        href="/privacy"
+                        class="text-body-secondary text-decoration-none"
+                >
+                    Политика конфиденциальности
+                </a>
+
+                <div class="text-body-secondary small mt-2">
+                    © <?= date('Y') ?> Fluent
+                </div>
+            </div>
+        </div>
     </div>
+
 </footer>
 
 <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
 </script>
 
 </body>
