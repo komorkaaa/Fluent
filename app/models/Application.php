@@ -75,12 +75,52 @@ class Application {
         return $statement->fetchAll();
     }
 
-    public static function all(): array {
+    public static function all(array $filters = []): array {
         $database = Database::connection();
 
-        $statement = $database->query(
-            'SELECT
+        $conditions = [];
+        $parameters = [];
+
+        if (
+            isset($filters['user_id'])
+            && $filters['user_id'] !== ''
+            && ctype_digit((string) $filters['user_id'])
+        ) {
+            $conditions[] = 'applications.user_id = :user_id';
+            $parameters['user_id'] = (int) $filters['user_id'];
+        }
+
+        if (
+            isset($filters['status'])
+            && $filters['status'] !== ''
+        ) {
+            $conditions[] = 'applications.status = :status';
+            $parameters['status'] = $filters['status'];
+        }
+
+        if (
+            isset($filters['date_from'])
+            && $filters['date_from'] !== ''
+        ) {
+            $conditions[] = 'applications.created_at >= :date_from';
+            $parameters['date_from'] = $filters['date_from'] . ' 00:00:00';
+        }
+
+        if (
+            isset($filters['date_to'])
+            && $filters['date_to'] !== ''
+        ) {
+            $conditions[] = 'applications.created_at < :date_to';
+            $parameters['date_to'] = date(
+                'Y-m-d 00:00:00',
+                strtotime($filters['date_to'] . ' +1 day')
+            );
+        }
+
+        $sql = '
+            SELECT
                 applications.id,
+                applications.user_id,
                 applications.name,
                 applications.phone,
                 applications.email,
@@ -88,19 +128,28 @@ class Application {
                 applications.status,
                 applications.created_at,
                 courses.name AS course_name,
-                users.name AS user_name
-             FROM applications
-             INNER JOIN courses
+                users.name AS user_name,
+                users.email AS user_email
+            FROM applications
+            INNER JOIN courses
                 ON courses.id = applications.course_id
-             LEFT JOIN users
+            LEFT JOIN users
                 ON users.id = applications.user_id
-             ORDER BY applications.created_at DESC'
-        );
+        ';
+
+        if ($conditions !== []) {
+            $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+
+        $sql .= ' ORDER BY applications.created_at DESC';
+
+        $statement = $database->prepare($sql);
+        $statement->execute($parameters);
 
         return $statement->fetchAll();
     }
 
-    public static function find(int $id): ?array {
+    public static function find(int $id): ?array{
         $database = Database::connection();
 
         $statement = $database->prepare(
@@ -148,12 +197,12 @@ class Application {
         ]);
     }
 
-    public static function delete(int $id): void {
+    public static function delete(int $id): void{
         $database = Database::connection();
 
         $statement = $database->prepare(
             'DELETE FROM applications
-         WHERE id = :id'
+             WHERE id = :id'
         );
 
         $statement->execute([

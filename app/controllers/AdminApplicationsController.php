@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Application;
+use App\Models\User;
 
 class AdminApplicationsController extends AdminController {
     private const STATUSES = [
@@ -16,12 +17,51 @@ class AdminApplicationsController extends AdminController {
     public function index(): void {
         $this->requireAdmin();
 
-        $applications = Application::all();
+        $filters = [
+            'user_id' => trim($_GET['user_id'] ?? ''),
+            'status' => trim($_GET['status'] ?? ''),
+            'date_from' => trim($_GET['date_from'] ?? ''),
+            'date_to' => trim($_GET['date_to'] ?? ''),
+        ];
+
+        if (!in_array($filters['status'], self::STATUSES, true)) {
+            $filters['status'] = '';
+        }
+
+        if (
+            $filters['date_from'] !== ''
+            && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $filters['date_from'])
+        ) {
+            $filters['date_from'] = '';
+        }
+
+        if (
+            $filters['date_to'] !== ''
+            && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $filters['date_to'])
+        ) {
+            $filters['date_to'] = '';
+        }
+
+        if (
+            $filters['date_from'] !== ''
+            && $filters['date_to'] !== ''
+            && $filters['date_from'] > $filters['date_to']
+        ) {
+            [$filters['date_from'], $filters['date_to']] = [
+                $filters['date_to'],
+                $filters['date_from'],
+            ];
+        }
+
+        $users = User::all();
+        $applications = Application::all($filters);
 
         $this->view('admin/applications/index', [
             'title' => 'Заявки — Fluent',
             'applications' => $applications,
             'statuses' => self::STATUSES,
+            'users' => $users,
+            'filters' => $filters,
         ]);
     }
 
