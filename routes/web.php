@@ -4,6 +4,7 @@ use App\Controllers\HomeController;
 use App\Controllers\CoursesController;
 use App\Controllers\ApplicationsController;
 use App\Controllers\AuthController;
+use App\Controllers\ProfileController;
 
 $router->get('/', [HomeController::class, 'index']);
 
@@ -24,3 +25,7 @@ $router->get('/login', [AuthController::class, 'login']);
 $router->post('/login', [AuthController::class, 'storeLogin']);
 
 $router->post('/logout', [AuthController::class, 'logout']);
+
+$router->get('/profile', [ProfileController::class, 'index']);
+
+$router->post('/profile', [ProfileController::class, 'update']);

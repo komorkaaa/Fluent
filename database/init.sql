@@ -58,24 +58,6 @@ INSERT INTO courses (
           'Испанский'
       );
 
-CREATE TABLE applications (
-                              id BIGSERIAL PRIMARY KEY,
-
-                              course_id BIGINT NOT NULL,
-                              name VARCHAR(255) NOT NULL,
-                              phone VARCHAR(50) NOT NULL,
-                              email VARCHAR(255) NOT NULL,
-                              comment TEXT,
-
-                              status VARCHAR(50) NOT NULL DEFAULT 'Новая',
-
-                              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-                              CONSTRAINT fk_applications_course
-                                  FOREIGN KEY (course_id)
-                                      REFERENCES courses(id)
-                                      ON DELETE RESTRICT
-);
 
 CREATE TABLE roles (
                        id BIGSERIAL PRIMARY KEY,
@@ -85,6 +67,7 @@ CREATE TABLE roles (
 INSERT INTO roles (name) VALUES
                              ('user'),
                              ('admin');
+
 
 CREATE TABLE users (
                        id BIGSERIAL PRIMARY KEY,
@@ -101,4 +84,31 @@ CREATE TABLE users (
                            FOREIGN KEY (role_id)
                                REFERENCES roles(id)
                                ON DELETE RESTRICT
+);
+
+
+CREATE TABLE applications (
+                              id BIGSERIAL PRIMARY KEY,
+
+                              course_id BIGINT NOT NULL,
+                              user_id BIGINT,
+
+                              name VARCHAR(255) NOT NULL,
+                              phone VARCHAR(50) NOT NULL,
+                              email VARCHAR(255) NOT NULL,
+                              comment TEXT,
+
+                              status VARCHAR(50) NOT NULL DEFAULT 'Новая',
+
+                              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                              CONSTRAINT fk_applications_course
+                                  FOREIGN KEY (course_id)
+                                      REFERENCES courses(id)
+                                      ON DELETE RESTRICT,
+
+                              CONSTRAINT fk_applications_user
+                                  FOREIGN KEY (user_id)
+                                      REFERENCES users(id)
+                                      ON DELETE SET NULL
 );

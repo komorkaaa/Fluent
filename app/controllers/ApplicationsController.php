@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Application;
 use App\Models\Course;
+use App\Core\Auth;
 
 class ApplicationsController extends Controller {
     public function create(int $courseId): void {
@@ -28,6 +29,7 @@ class ApplicationsController extends Controller {
 
     public function store(int $courseId): void {
         $course = Course::find($courseId);
+        $user = Auth::user();
 
         if ($course === null) {
             http_response_code(404);
@@ -81,7 +83,8 @@ class ApplicationsController extends Controller {
             $name,
             $phone,
             $email,
-            $comment !== '' ? $comment : null
+            $comment !== '' ? $comment : null,
+            $user['id'] ?? null
         );
 
         $this->view('applications/success', [

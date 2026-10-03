@@ -66,4 +66,25 @@ class User {
 
         return (int) $statement->fetchColumn();
     }
+
+    public static function update(
+        int $id,
+        string $name,
+        string $email
+    ): void {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'UPDATE users
+         SET name = :name,
+             email = :email
+         WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
+            'name' => $name,
+            'email' => $email,
+        ]);
+    }
 }

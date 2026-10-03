@@ -1,3 +1,12 @@
+<?php
+
+use App\Core\Auth;
+
+Auth::start();
+
+$user = Auth::user();
+?>
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -20,26 +29,24 @@
 <body>
 
 <header>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                Fluent
-            </a>
+            <a class="navbar-brand fw-bold" href="/">Fluent</a>
 
             <button
-                class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mainNavbar"
-                aria-controls="mainNavbar"
-                aria-expanded="false"
-                aria-label="Переключить навигацию"
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                    aria-controls="navbarNav"
+                    aria-expanded="false"
+                    aria-label="Переключить навигацию"
             >
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav ms-auto">
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/">Главная</a>
                     </li>
@@ -51,10 +58,37 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/contacts">Контакты</a>
                     </li>
+                </ul>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="/login">Войти</a>
-                    </li>
+                <ul class="navbar-nav">
+                    <?php if ($user === null): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">Войти</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-lg-2" href="/register">
+                                Регистрация
+                            </a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/profile">
+                                <?= htmlspecialchars($user['name']) ?>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <form method="POST" action="/logout" class="d-inline">
+                                <button
+                                        type="submit"
+                                        class="btn btn-outline-danger ms-lg-2"
+                                >
+                                    Выйти
+                                </button>
+                            </form>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
