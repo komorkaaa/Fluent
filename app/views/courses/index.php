@@ -34,26 +34,14 @@
                             >
                                 <option value="">Все языки</option>
 
-                                <option
-                                    value="Английский"
-                                    <?= $language === 'Английский' ? 'selected' : '' ?>
-                                >
-                                    Английский
-                                </option>
-
-                                <option
-                                    value="Немецкий"
-                                    <?= $language === 'Немецкий' ? 'selected' : '' ?>
-                                >
-                                    Немецкий
-                                </option>
-
-                                <option
-                                    value="Испанский"
-                                    <?= $language === 'Испанский' ? 'selected' : '' ?>
-                                >
-                                    Испанский
-                                </option>
+                                <?php foreach ($languages as $item): ?>
+                                    <option
+                                            value="<?= htmlspecialchars($item) ?>"
+                                            <?= $language === $item ? 'selected' : '' ?>
+                                    >
+                                        <?= htmlspecialchars($item) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
 
@@ -69,19 +57,14 @@
                             >
                                 <option value="">Все уровни</option>
 
-                                <option
-                                    value="Начальный"
-                                    <?= $level === 'Начальный' ? 'selected' : '' ?>
-                                >
-                                    Начальный
-                                </option>
-
-                                <option
-                                    value="Средний"
-                                    <?= $level === 'Средний' ? 'selected' : '' ?>
-                                >
-                                    Средний
-                                </option>
+                                <?php foreach ($levels as $item): ?>
+                                    <option
+                                            value="<?= htmlspecialchars($item) ?>"
+                                            <?= $level === $item ? 'selected' : '' ?>
+                                    >
+                                        <?= htmlspecialchars($item) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
 
@@ -97,19 +80,14 @@
                             >
                                 <option value="">Любой формат</option>
 
-                                <option
-                                    value="Онлайн"
-                                    <?= $format === 'Онлайн' ? 'selected' : '' ?>
-                                >
-                                    Онлайн
-                                </option>
-
-                                <option
-                                    value="Очно"
-                                    <?= $format === 'Очно' ? 'selected' : '' ?>
-                                >
-                                    Очно
-                                </option>
+                                <?php foreach ($formats as $item): ?>
+                                    <option
+                                            value="<?= htmlspecialchars($item) ?>"
+                                            <?= $format === $item ? 'selected' : '' ?>
+                                    >
+                                        <?= htmlspecialchars($item) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
 

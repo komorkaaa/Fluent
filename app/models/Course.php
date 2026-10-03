@@ -192,4 +192,43 @@ class Course {
             'id' => $id,
         ]);
     }
+
+    public static function distinctLanguages(): array {
+        $database = Database::connection();
+
+        $statement = $database->query(
+            'SELECT DISTINCT language
+         FROM courses
+         WHERE language <> \'\'
+         ORDER BY language ASC'
+        );
+
+        return $statement->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    public static function distinctLevels(): array {
+        $database = Database::connection();
+
+        $statement = $database->query(
+            'SELECT DISTINCT level
+         FROM courses
+         WHERE level <> \'\'
+         ORDER BY level ASC'
+        );
+
+        return $statement->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    public static function distinctFormats(): array {
+        $database = Database::connection();
+
+        $statement = $database->query(
+            'SELECT DISTINCT format
+         FROM courses
+         WHERE format <> \'\'
+         ORDER BY format ASC'
+        );
+
+        return $statement->fetchAll(\PDO::FETCH_COLUMN);
+    }
 }

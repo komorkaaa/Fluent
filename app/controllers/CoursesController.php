@@ -20,9 +20,16 @@ class CoursesController extends Controller {
             $sort
         );
 
+        $languages = Course::distinctLanguages();
+        $levels = Course::distinctLevels();
+        $formats = Course::distinctFormats();
+
         $this->view('courses/index', [
             'title' => 'Курсы — Fluent',
             'courses' => $courses,
+            'languages' => $languages,
+            'levels' => $levels,
+            'formats' => $formats,
             'language' => $language,
             'level' => $level,
             'format' => $format,
