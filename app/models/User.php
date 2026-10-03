@@ -76,15 +76,56 @@ class User {
 
         $statement = $database->prepare(
             'UPDATE users
-         SET name = :name,
-             email = :email
-         WHERE id = :id'
+             SET name = :name,
+                 email = :email
+             WHERE id = :id'
         );
 
         $statement->execute([
             'id' => $id,
             'name' => $name,
             'email' => $email,
+        ]);
+    }
+
+    public static function all(): array {
+        $database = Database::connection();
+
+        $statement = $database->query(
+            'SELECT
+                users.id,
+                users.name,
+                users.email,
+                users.created_at,
+                roles.name AS role
+             FROM users
+             INNER JOIN roles
+                ON roles.id = users.role_id
+             ORDER BY users.created_at DESC'
+        );
+
+        return $statement->fetchAll();
+    }
+
+    public static function updateRole(
+        int $id,
+        string $role
+    ): void {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'UPDATE users
+             SET role_id = (
+                 SELECT id
+                 FROM roles
+                 WHERE name = :role
+             )
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
+            'role' => $role,
         ]);
     }
 }

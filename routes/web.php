@@ -8,6 +8,7 @@ use App\Controllers\ProfileController;
 use App\Controllers\AdminDashboardController;
 use App\Controllers\AdminCoursesController;
 use App\Controllers\AdminApplicationsController;
+use App\Controllers\AdminUsersController;
 
 $router->get('/', [HomeController::class, 'index']);
 
@@ -41,3 +42,5 @@ $router->post('/admin/courses/{id}/delete', [AdminCoursesController::class, 'del
 $router->get('/admin/applications', [AdminApplicationsController::class, 'index']);
 $router->post('/admin/applications/{id}/status', [AdminApplicationsController::class, 'updateStatus']);
 $router->post('/admin/applications/{id}/delete', [AdminApplicationsController::class, 'delete']);
+$router->get('/admin/users', [AdminUsersController::class, 'index']);
+$router->post('/admin/users/{id}/role', [AdminUsersController::class, 'updateRole']);
