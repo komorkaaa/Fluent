@@ -7,10 +7,8 @@ use App\Core\Controller;
 use App\Models\Application;
 use App\Models\Course;
 
-class ApplicationsController extends Controller
-{
-    public function create(int $courseId): void
-    {
+class ApplicationsController extends Controller {
+    public function create(int $courseId): void {
         $course = Course::find($courseId);
 
         if ($course === null) {
@@ -32,8 +30,7 @@ class ApplicationsController extends Controller
         ]);
     }
 
-    public function store(int $courseId): void
-    {
+    public function store(int $courseId): void {
         $course = Course::find($courseId);
         $user = Auth::user();
 

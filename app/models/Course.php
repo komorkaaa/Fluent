@@ -76,4 +76,92 @@ class Course {
 
         return $course ?: null;
     }
+
+    public static function create(
+        string $name,
+        string $description,
+        float $price,
+        string $level,
+        string $format,
+        string $language
+    ): int {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'INSERT INTO courses (
+                name,
+                description,
+                price,
+                level,
+                format,
+                language
+            )
+            VALUES (
+                :name,
+                :description,
+                :price,
+                :level,
+                :format,
+                :language
+            )
+            RETURNING id'
+        );
+
+        $statement->execute([
+            'name' => $name,
+            'description' => $description,
+            'price' => $price,
+            'level' => $level,
+            'format' => $format,
+            'language' => $language,
+        ]);
+
+        return (int) $statement->fetchColumn();
+    }
+
+    public static function update(
+        int $id,
+        string $name,
+        string $description,
+        float $price,
+        string $level,
+        string $format,
+        string $language
+    ): void {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'UPDATE courses
+             SET name = :name,
+                 description = :description,
+                 price = :price,
+                 level = :level,
+                 format = :format,
+                 language = :language
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
+            'name' => $name,
+            'description' => $description,
+            'price' => $price,
+            'level' => $level,
+            'format' => $format,
+            'language' => $language,
+        ]);
+    }
+
+    public static function delete(int $id): void {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'DELETE FROM courses
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
+        ]);
+    }
 }

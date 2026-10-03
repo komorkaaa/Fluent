@@ -4,8 +4,7 @@ namespace App\Models;
 
 use App\Core\Database;
 
-class Application
-{
+class Application {
     public static function create(
         int $courseId,
         string $name,
@@ -48,8 +47,7 @@ class Application
         return (int) $statement->fetchColumn();
     }
 
-    public static function findByUserId(int $userId): array
-    {
+    public static function findByUserId(int $userId): array {
         $database = Database::connection();
 
         $statement = $database->prepare(
@@ -75,5 +73,91 @@ class Application
         ]);
 
         return $statement->fetchAll();
+    }
+
+    public static function all(): array {
+        $database = Database::connection();
+
+        $statement = $database->query(
+            'SELECT
+                applications.id,
+                applications.name,
+                applications.phone,
+                applications.email,
+                applications.comment,
+                applications.status,
+                applications.created_at,
+                courses.name AS course_name,
+                users.name AS user_name
+             FROM applications
+             INNER JOIN courses
+                ON courses.id = applications.course_id
+             LEFT JOIN users
+                ON users.id = applications.user_id
+             ORDER BY applications.created_at DESC'
+        );
+
+        return $statement->fetchAll();
+    }
+
+    public static function find(int $id): ?array {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'SELECT
+                applications.id,
+                applications.course_id,
+                applications.user_id,
+                applications.name,
+                applications.phone,
+                applications.email,
+                applications.comment,
+                applications.status,
+                applications.created_at,
+                courses.name AS course_name
+             FROM applications
+             INNER JOIN courses
+                ON courses.id = applications.course_id
+             WHERE applications.id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
+        ]);
+
+        $application = $statement->fetch();
+
+        return $application ?: null;
+    }
+
+    public static function updateStatus(
+        int $id,
+        string $status
+    ): void {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'UPDATE applications
+             SET status = :status
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
+            'status' => $status,
+        ]);
+    }
+
+    public static function delete(int $id): void {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'DELETE FROM applications
+         WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
+        ]);
     }
 }

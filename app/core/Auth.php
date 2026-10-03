@@ -56,4 +56,11 @@ class Auth {
 
         return $_SESSION['user'] ?? null;
     }
+
+    public static function isAdmin(): bool {
+        self::start();
+
+        return isset($_SESSION['user'])
+            && $_SESSION['user']['role'] === 'admin';
+    }
 }
