@@ -30,6 +30,8 @@ class ProfileController extends Controller {
     }
 
     public function update(): void {
+        $this->verifyCsrf();
+
         Auth::start();
 
         if (!Auth::check()) {
@@ -46,12 +48,16 @@ class ProfileController extends Controller {
 
         if ($name === '') {
             $errors[] = 'Введите имя.';
+        } elseif (mb_strlen($name) > 255) {
+            $errors[] = 'Имя не должно превышать 255 символов.';
         }
 
         if ($email === '') {
             $errors[] = 'Введите email.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Введите корректный email.';
+        } elseif (mb_strlen($email) > 255) {
+            $errors[] = 'Email не должен превышать 255 символов.';
         }
 
         $existingUser = User::findByEmail($email);

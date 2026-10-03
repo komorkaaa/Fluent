@@ -26,7 +26,13 @@
 
                 <form
                         method="POST"
-                        action="/courses/<?= (int) $course['id'] ?>/apply"
+                        action="/courses/<?= (int) $course['id'] ?>
+
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >/apply"
                 >
 
                     <?php if ($user !== null): ?>
@@ -101,6 +107,7 @@
                                 class="form-control"
                                 id="phone"
                                 name="phone"
+                                autocomplete="tel"
                                 value="<?= htmlspecialchars($old['phone'] ?? '') ?>"
                                 required
                         >

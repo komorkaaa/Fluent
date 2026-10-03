@@ -102,7 +102,13 @@
 
                                         <form
                                                 method="POST"
-                                                action="/admin/users/<?= (int) $user['id'] ?>/role"
+                                                action="/admin/users/<?= (int) $user['id'] ?>
+
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >/role"
                                         >
                                             <div class="d-flex gap-2">
 
@@ -170,7 +176,13 @@
 
                                                     <form
                                                             method="POST"
-                                                            action="/admin/users/<?= (int) $user['id'] ?>/unblock"
+                                                            action="/admin/users/<?= (int) $user['id'] ?>
+
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >/unblock"
                                                     >
                                                         <button
                                                                 type="submit"
@@ -184,7 +196,13 @@
 
                                                     <form
                                                             method="POST"
-                                                            action="/admin/users/<?= (int) $user['id'] ?>/block"
+                                                            action="/admin/users/<?= (int) $user['id'] ?>
+
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >/block"
                                                     >
                                                         <button
                                                                 type="submit"
@@ -198,7 +216,13 @@
 
                                                 <form
                                                         method="POST"
-                                                        action="/admin/users/<?= (int) $user['id'] ?>/delete"
+                                                        action="/admin/users/<?= (int) $user['id'] ?>
+
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >/delete"
                                                         onsubmit="return confirm('Удалить этого пользователя?');"
                                                 >
                                                     <button

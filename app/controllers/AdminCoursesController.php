@@ -25,6 +25,7 @@ class AdminCoursesController extends AdminController {
     }
 
     public function store(): void {
+        $this->verifyCsrf();
         $this->requireAdmin();
 
         $name = trim($_POST['name'] ?? '');
@@ -99,6 +100,7 @@ class AdminCoursesController extends AdminController {
     }
 
     public function update(int $id): void {
+        $this->verifyCsrf();
         $this->requireAdmin();
 
         $course = Course::find($id);
@@ -166,6 +168,7 @@ class AdminCoursesController extends AdminController {
     }
 
     public function delete(int $id): void {
+        $this->verifyCsrf();
         $this->requireAdmin();
 
         $course = Course::find($id);
@@ -211,6 +214,8 @@ class AdminCoursesController extends AdminController {
             $errors[] = 'Введите цену.';
         } elseif (!is_numeric($price) || (float) $price < 0) {
             $errors[] = 'Цена должна быть неотрицательным числом.';
+        } elseif ((float) $price > 99999999.99) {
+            $errors[] = 'Цена не должна превышать 99 999 999,99 ₽.';
         }
 
         if ($level === '') {

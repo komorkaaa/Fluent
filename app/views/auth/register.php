@@ -29,6 +29,12 @@
 
                 <form method="POST" action="/register">
 
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >
+
                     <div class="mb-3">
                         <label for="name" class="form-label">
                             Имя
@@ -39,6 +45,7 @@
                             class="form-control"
                             id="name"
                             name="name"
+                            autocomplete="name"
                             value="<?= htmlspecialchars($old['name'] ?? '') ?>"
                             required
                         >
@@ -54,6 +61,7 @@
                             class="form-control"
                             id="email"
                             name="email"
+                            autocomplete="email"
                             value="<?= htmlspecialchars($old['email'] ?? '') ?>"
                             required
                         >
@@ -69,6 +77,7 @@
                             class="form-control"
                             id="password"
                             name="password"
+                            autocomplete="new-password"
                             required
                         >
                     </div>
@@ -83,6 +92,7 @@
                             class="form-control"
                             id="password_confirmation"
                             name="password_confirmation"
+                            autocomplete="new-password"
                             required
                         >
                     </div>

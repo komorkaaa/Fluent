@@ -178,7 +178,13 @@
 
                                         <form
                                                 method="POST"
-                                                action="/admin/applications/<?= (int) $application['id'] ?>/status"
+                                                action="/admin/applications/<?= (int) $application['id'] ?>
+
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >/status"
                                         >
                                             <div class="d-flex gap-2">
                                                 <select
@@ -208,7 +214,13 @@
 
                                         <form
                                                 method="POST"
-                                                action="/admin/applications/<?= (int) $application['id'] ?>/delete"
+                                                action="/admin/applications/<?= (int) $application['id'] ?>
+
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >/delete"
                                                 onsubmit="return confirm('Удалить заявку #<?= (int) $application['id'] ?>?');"
                                         >
                                             <button

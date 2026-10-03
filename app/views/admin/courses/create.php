@@ -21,6 +21,12 @@
 
         <form method="POST">
 
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >
+
             <div class="mb-3">
                 <label for="name" class="form-label">
                     Название

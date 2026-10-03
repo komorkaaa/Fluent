@@ -14,6 +14,8 @@ class AuthController extends Controller {
     }
 
     public function storeRegister(): void {
+        $this->verifyCsrf();
+
         $name = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -23,12 +25,16 @@ class AuthController extends Controller {
 
         if ($name === '') {
             $errors[] = 'Введите имя.';
+        } elseif (mb_strlen($name) > 255) {
+            $errors[] = 'Имя не должно превышать 255 символов.';
         }
 
         if ($email === '') {
             $errors[] = 'Введите email.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Введите корректный email.';
+        } elseif (mb_strlen($email) > 255) {
+            $errors[] = 'Email не должен превышать 255 символов.';
         }
 
         if ($password === '') {
@@ -76,6 +82,8 @@ class AuthController extends Controller {
     }
 
     public function storeLogin(): void {
+        $this->verifyCsrf();
+
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -125,6 +133,8 @@ class AuthController extends Controller {
     }
 
     public function logout(): void {
+        $this->verifyCsrf();
+
         Auth::logout();
 
         header('Location: /');

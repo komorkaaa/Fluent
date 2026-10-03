@@ -29,6 +29,12 @@
 
                 <form method="POST" action="/login">
 
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >
+
                     <div class="mb-3">
                         <label for="email" class="form-label">
                             Email
@@ -39,6 +45,7 @@
                             class="form-control"
                             id="email"
                             name="email"
+                            autocomplete="email"
                             value="<?= htmlspecialchars($old['email'] ?? '') ?>"
                             required
                         >
@@ -54,6 +61,7 @@
                             class="form-control"
                             id="password"
                             name="password"
+                            autocomplete="current-password"
                             required
                         >
                     </div>

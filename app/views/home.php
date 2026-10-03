@@ -1,4 +1,4 @@
-<section class="bg-primary text-white py-5">
+<section class="hero-section text-white py-5">
     <div class="container py-lg-4">
         <div class="row align-items-center">
             <div class="col-lg-8">

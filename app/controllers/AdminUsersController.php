@@ -25,6 +25,7 @@ class AdminUsersController extends AdminController {
     }
 
     public function updateRole(int $id): void {
+        $this->verifyCsrf();
         $this->requireAdmin();
 
         $currentUser = Auth::user();
@@ -60,6 +61,7 @@ class AdminUsersController extends AdminController {
     }
 
     public function block(int $id): void {
+        $this->verifyCsrf();
         $this->requireAdmin();
 
         $currentUser = Auth::user();
@@ -85,6 +87,7 @@ class AdminUsersController extends AdminController {
     }
 
     public function unblock(int $id): void {
+        $this->verifyCsrf();
         $this->requireAdmin();
 
         $user = $this->findUser($id);
@@ -102,6 +105,7 @@ class AdminUsersController extends AdminController {
     }
 
     public function delete(int $id): void {
+        $this->verifyCsrf();
         $this->requireAdmin();
 
         $currentUser = Auth::user();
@@ -153,7 +157,7 @@ class AdminUsersController extends AdminController {
     }
 
     private function showForbidden(string $title): void {
-        http_response_code(400);
+        http_response_code(403);
 
         $this->view('errors/403', [
             'title' => $title,

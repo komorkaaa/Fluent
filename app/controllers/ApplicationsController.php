@@ -31,6 +31,8 @@ class ApplicationsController extends Controller {
     }
 
     public function store(int $courseId): void {
+        $this->verifyCsrf();
+
         $course = Course::find($courseId);
         $user = Auth::user();
 
@@ -69,6 +71,20 @@ class ApplicationsController extends Controller {
 
         if ($phone === '') {
             $errors[] = 'Введите номер телефона.';
+        } else {
+            $phoneDigits = preg_replace('/\D+/', '', $phone);
+
+            if ($phoneDigits === null || strlen($phoneDigits) < 10 || strlen($phoneDigits) > 15) {
+                $errors[] = 'Введите корректный номер телефона.';
+            }
+        }
+
+        if (mb_strlen($phone) > 50) {
+            $errors[] = 'Номер телефона не должен превышать 50 символов.';
+        }
+
+        if (mb_strlen($comment) > 5000) {
+            $errors[] = 'Комментарий не должен превышать 5000 символов.';
         }
 
         if ($errors !== []) {

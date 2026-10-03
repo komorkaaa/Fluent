@@ -21,7 +21,13 @@
 
         <form
             method="POST"
-            action="/admin/courses/<?= (int) $course['id'] ?>/edit"
+            action="/admin/courses/<?= (int) $course['id'] ?>
+
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >/edit"
         >
 
             <div class="mb-3">

@@ -122,7 +122,7 @@
 
                         <div class="col-md-6 col-lg-4">
 
-                            <div class="card h-100">
+                            <div class="card h-100 course-card">
 
                                 <img
                                         src="<?= htmlspecialchars($similarCourse['image'] ?: '/images/course-placeholder.svg') ?>"

@@ -110,6 +110,11 @@ $user = Auth::user();
 
                         <li class="nav-item">
                             <form method="POST" action="/logout" class="d-inline">
+                                <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
+                                >
                                 <button
                                         type="submit"
                                         class="btn btn-outline-danger ms-lg-2"

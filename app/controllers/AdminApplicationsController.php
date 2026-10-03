@@ -28,17 +28,11 @@ class AdminApplicationsController extends AdminController {
             $filters['status'] = '';
         }
 
-        if (
-            $filters['date_from'] !== ''
-            && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $filters['date_from'])
-        ) {
+        if (!$this->isValidDate($filters['date_from'])) {
             $filters['date_from'] = '';
         }
 
-        if (
-            $filters['date_to'] !== ''
-            && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $filters['date_to'])
-        ) {
+        if (!$this->isValidDate($filters['date_to'])) {
             $filters['date_to'] = '';
         }
 
@@ -66,6 +60,8 @@ class AdminApplicationsController extends AdminController {
     }
 
     public function updateStatus(int $id): void {
+        $this->verifyCsrf();
+
         $this->requireAdmin();
 
         $application = Application::find($id);
@@ -97,6 +93,8 @@ class AdminApplicationsController extends AdminController {
     }
 
     public function delete(int $id): void {
+        $this->verifyCsrf();
+
         $this->requireAdmin();
 
         $application = Application::find($id);
@@ -116,4 +114,16 @@ class AdminApplicationsController extends AdminController {
         header('Location: /admin/applications');
         exit;
     }
+    private function isValidDate(string $date): bool {
+        if ($date === '') {
+            return true;
+        }
+
+        $parsed = \DateTime::createFromFormat('!Y-m-d', $date);
+
+        return $parsed !== false
+            && $parsed->format('Y-m-d') === $date;
+    }
+
+
 }
