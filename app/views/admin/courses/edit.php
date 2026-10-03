@@ -100,6 +100,22 @@
                 >
             </div>
 
+            <div class="mb-3">
+                <label for="format" class="form-label">
+                    Формат
+                </label>
+
+                <input
+                        type="text"
+                        class="form-control"
+                        id="format"
+                        name="format"
+                        value="<?= htmlspecialchars($course['format']) ?>"
+                        placeholder="Например: Онлайн"
+                        required
+                >
+            </div>
+
             <div class="mb-4">
                 <label for="image" class="form-label">
                     Изображение курса

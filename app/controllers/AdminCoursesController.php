@@ -33,6 +33,7 @@ class AdminCoursesController extends AdminController {
         $level = trim($_POST['level'] ?? '');
         $format = trim($_POST['format'] ?? '');
         $language = trim($_POST['language'] ?? '');
+        $image = trim($_POST['image'] ?? '');
 
         $errors = $this->validate(
             $name,
@@ -40,7 +41,8 @@ class AdminCoursesController extends AdminController {
             $price,
             $level,
             $format,
-            $language
+            $language,
+            $image
         );
 
         if ($errors !== []) {
@@ -54,6 +56,7 @@ class AdminCoursesController extends AdminController {
                     'level' => $level,
                     'format' => $format,
                     'language' => $language,
+                    'image' => $image,
                 ],
             ]);
 
@@ -66,7 +69,8 @@ class AdminCoursesController extends AdminController {
             (float) $price,
             $level,
             $format,
-            $language
+            $language,
+            $image !== '' ? $image : null
         );
 
         header('Location: /admin/courses');
@@ -115,6 +119,7 @@ class AdminCoursesController extends AdminController {
         $level = trim($_POST['level'] ?? '');
         $format = trim($_POST['format'] ?? '');
         $language = trim($_POST['language'] ?? '');
+        $image = trim($_POST['image'] ?? '');
 
         $errors = $this->validate(
             $name,
@@ -122,7 +127,8 @@ class AdminCoursesController extends AdminController {
             $price,
             $level,
             $format,
-            $language
+            $language,
+            $image
         );
 
         if ($errors !== []) {
@@ -136,6 +142,7 @@ class AdminCoursesController extends AdminController {
                     'level' => $level,
                     'format' => $format,
                     'language' => $language,
+                    'image' => $image,
                 ],
                 'errors' => $errors,
             ]);
@@ -150,7 +157,8 @@ class AdminCoursesController extends AdminController {
             (float) $price,
             $level,
             $format,
-            $language
+            $language,
+            $image !== '' ? $image : null
         );
 
         header('Location: /admin/courses');
@@ -184,12 +192,15 @@ class AdminCoursesController extends AdminController {
         string $price,
         string $level,
         string $format,
-        string $language
+        string $language,
+        string $image
     ): array {
         $errors = [];
 
         if ($name === '') {
             $errors[] = 'Введите название курса.';
+        } elseif (mb_strlen($name) > 255) {
+            $errors[] = 'Название курса не должно превышать 255 символов.';
         }
 
         if ($description === '') {
@@ -204,14 +215,24 @@ class AdminCoursesController extends AdminController {
 
         if ($level === '') {
             $errors[] = 'Укажите уровень.';
+        } elseif (mb_strlen($level) > 50) {
+            $errors[] = 'Уровень не должен превышать 50 символов.';
         }
 
         if ($format === '') {
             $errors[] = 'Укажите формат.';
+        } elseif (mb_strlen($format) > 50) {
+            $errors[] = 'Формат не должен превышать 50 символов.';
         }
 
         if ($language === '') {
             $errors[] = 'Укажите язык.';
+        } elseif (mb_strlen($language) > 100) {
+            $errors[] = 'Название языка не должно превышать 100 символов.';
+        }
+
+        if ($image !== '' && mb_strlen($image) > 500) {
+            $errors[] = 'Путь к изображению не должен превышать 500 символов.';
         }
 
         return $errors;
