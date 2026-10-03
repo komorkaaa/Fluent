@@ -104,14 +104,33 @@
                 </label>
 
                 <input
-                    type="text"
-                    class="form-control"
-                    id="format"
-                    name="format"
-                    value="<?= htmlspecialchars($old['format'] ?? '') ?>"
-                    placeholder="Например: Онлайн"
-                    required
+                        type="text"
+                        class="form-control"
+                        id="format"
+                        name="format"
+                        value="<?= htmlspecialchars($old['format'] ?? '') ?>"
+                        placeholder="Например: Онлайн"
+                        required
                 >
+            </div>
+
+            <div class="mb-4">
+                <label for="image" class="form-label">
+                    Изображение курса
+                </label>
+
+                <input
+                        type="text"
+                        class="form-control"
+                        id="image"
+                        name="image"
+                        value="<?= htmlspecialchars($old['image'] ?? '') ?>"
+                        placeholder="/images/courses/english.jpg"
+                >
+
+                <div class="form-text">
+                    Необязательное поле. Укажи путь к изображению курса.
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">

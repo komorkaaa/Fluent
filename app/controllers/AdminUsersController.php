@@ -20,6 +20,7 @@ class AdminUsersController extends AdminController {
             'title' => 'Пользователи — Fluent',
             'users' => $users,
             'roles' => self::ROLES,
+            'currentUser' => Auth::user(),
         ]);
     }
 

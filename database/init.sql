@@ -6,6 +6,7 @@ CREATE TABLE courses (
                          level VARCHAR(50) NOT NULL,
                          format VARCHAR(50) NOT NULL,
                          language VARCHAR(100) NOT NULL,
+                         image VARCHAR(500),
                          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -101,18 +101,22 @@
             </div>
 
             <div class="mb-4">
-                <label for="format" class="form-label">
-                    Формат
+                <label for="image" class="form-label">
+                    Изображение курса
                 </label>
 
                 <input
-                    type="text"
-                    class="form-control"
-                    id="format"
-                    name="format"
-                    value="<?= htmlspecialchars($course['format']) ?>"
-                    required
+                        type="text"
+                        class="form-control"
+                        id="image"
+                        name="image"
+                        value="<?= htmlspecialchars($course['image'] ?? '') ?>"
+                        placeholder="/images/courses/english.jpg"
                 >
+
+                <div class="form-text">
+                    Необязательное поле. Можно указать путь к изображению.
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">

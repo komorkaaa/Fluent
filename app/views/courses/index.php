@@ -176,6 +176,13 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100">
 
+                        <img
+                                src="<?= htmlspecialchars($course['image'] ?: '/images/course-placeholder.svg') ?>"
+                                class="card-img-top"
+                                alt="<?= htmlspecialchars($course['name']) ?>"
+                                style="height: 220px; object-fit: cover;"
+                        >
+
                         <div class="card-body d-flex flex-column">
 
                             <h2 class="card-title h4">

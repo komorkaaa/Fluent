@@ -43,9 +43,15 @@ class CoursesController extends Controller {
             return;
         }
 
+        $similarCourses = Course::similar(
+            (int) $course['id'],
+            $course['language']
+        );
+
         $this->view('courses/show', [
             'title' => $course['name'] . ' — Fluent',
             'course' => $course,
+            'similarCourses' => $similarCourses,
         ]);
     }
 }

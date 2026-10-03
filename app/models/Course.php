@@ -77,13 +77,35 @@ class Course {
         return $course ?: null;
     }
 
+    public static function similar(int $id, string $language, int $limit = 3): array {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'SELECT *
+             FROM courses
+             WHERE id != :id
+               AND language = :language
+             ORDER BY created_at DESC
+             LIMIT :limit'
+        );
+
+        $statement->bindValue(':id', $id, \PDO::PARAM_INT);
+        $statement->bindValue(':language', $language);
+        $statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
+
+        $statement->execute();
+
+        return $statement->fetchAll();
+    }
+
     public static function create(
         string $name,
         string $description,
         float $price,
         string $level,
         string $format,
-        string $language
+        string $language,
+        ?string $image = null
     ): int {
         $database = Database::connection();
 
@@ -94,7 +116,8 @@ class Course {
                 price,
                 level,
                 format,
-                language
+                language,
+                image
             )
             VALUES (
                 :name,
@@ -102,7 +125,8 @@ class Course {
                 :price,
                 :level,
                 :format,
-                :language
+                :language,
+                :image
             )
             RETURNING id'
         );
@@ -114,6 +138,7 @@ class Course {
             'level' => $level,
             'format' => $format,
             'language' => $language,
+            'image' => $image,
         ]);
 
         return (int) $statement->fetchColumn();
@@ -126,7 +151,8 @@ class Course {
         float $price,
         string $level,
         string $format,
-        string $language
+        string $language,
+        ?string $image = null
     ): void {
         $database = Database::connection();
 
@@ -137,7 +163,8 @@ class Course {
                  price = :price,
                  level = :level,
                  format = :format,
-                 language = :language
+                 language = :language,
+                 image = :image
              WHERE id = :id'
         );
 
@@ -149,6 +176,7 @@ class Course {
             'level' => $level,
             'format' => $format,
             'language' => $language,
+            'image' => $image,
         ]);
     }
 
