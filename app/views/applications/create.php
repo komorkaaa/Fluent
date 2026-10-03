@@ -22,25 +22,74 @@
         <?php endif; ?>
 
         <div class="row">
-
             <div class="col-lg-7">
 
-                <form method="POST" action="/courses/<?= (int) $course['id'] ?>/apply">
+                <form
+                        method="POST"
+                        action="/courses/<?= (int) $course['id'] ?>/apply"
+                >
 
-                    <div class="mb-3">
-                        <label for="name" class="form-label">
-                            Имя
-                        </label>
+                    <?php if ($user !== null): ?>
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="name"
-                            name="name"
-                            value="<?= htmlspecialchars($old['name'] ?? '') ?>"
-                            required
-                        >
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Имя
+                            </label>
+
+                            <input
+                                    type="text"
+                                    class="form-control"
+                                    value="<?= htmlspecialchars($user['name']) ?>"
+                                    readonly
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Email
+                            </label>
+
+                            <input
+                                    type="email"
+                                    class="form-control"
+                                    value="<?= htmlspecialchars($user['email']) ?>"
+                                    readonly
+                            >
+                        </div>
+
+                    <?php else: ?>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                Имя
+                            </label>
+
+                            <input
+                                    type="text"
+                                    class="form-control"
+                                    id="name"
+                                    name="name"
+                                    value="<?= htmlspecialchars($old['name'] ?? '') ?>"
+                                    required
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                Email
+                            </label>
+
+                            <input
+                                    type="email"
+                                    class="form-control"
+                                    id="email"
+                                    name="email"
+                                    value="<?= htmlspecialchars($old['email'] ?? '') ?>"
+                                    required
+                            >
+                        </div>
+
+                    <?php endif; ?>
 
                     <div class="mb-3">
                         <label for="phone" class="form-label">
@@ -48,27 +97,12 @@
                         </label>
 
                         <input
-                            type="tel"
-                            class="form-control"
-                            id="phone"
-                            name="phone"
-                            value="<?= htmlspecialchars($old['phone'] ?? '') ?>"
-                            required
-                        >
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="email" class="form-label">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            class="form-control"
-                            id="email"
-                            name="email"
-                            value="<?= htmlspecialchars($old['email'] ?? '') ?>"
-                            required
+                                type="tel"
+                                class="form-control"
+                                id="phone"
+                                name="phone"
+                                value="<?= htmlspecialchars($old['phone'] ?? '') ?>"
+                                required
                         >
                     </div>
 
@@ -78,10 +112,10 @@
                         </label>
 
                         <textarea
-                            class="form-control"
-                            id="comment"
-                            name="comment"
-                            rows="4"
+                                class="form-control"
+                                id="comment"
+                                name="comment"
+                                rows="4"
                         ><?= htmlspecialchars($old['comment'] ?? '') ?></textarea>
                     </div>
 
@@ -90,8 +124,8 @@
                     </button>
 
                     <a
-                        href="/courses/<?= (int) $course['id'] ?>"
-                        class="btn btn-outline-secondary ms-2"
+                            href="/courses/<?= (int) $course['id'] ?>"
+                            class="btn btn-outline-secondary ms-2"
                     >
                         Назад к курсу
                     </a>
@@ -99,7 +133,6 @@
                 </form>
 
             </div>
-
         </div>
 
     </div>
