@@ -15,6 +15,7 @@ class User {
                 users.email,
                 users.password,
                 users.role_id,
+                users.is_blocked,
                 roles.name AS role
              FROM users
              INNER JOIN roles ON roles.id = users.role_id
@@ -97,6 +98,7 @@ class User {
                 users.name,
                 users.email,
                 users.created_at,
+                users.is_blocked,
                 roles.name AS role
              FROM users
              INNER JOIN roles
@@ -126,6 +128,46 @@ class User {
         $statement->execute([
             'id' => $id,
             'role' => $role,
+        ]);
+    }
+
+    public static function setBlocked(
+        int $id,
+        bool $blocked
+    ): void {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'UPDATE users
+         SET is_blocked = :is_blocked
+         WHERE id = :id'
+        );
+
+        $statement->bindValue(
+            ':is_blocked',
+            $blocked,
+            \PDO::PARAM_BOOL
+        );
+
+        $statement->bindValue(
+            ':id',
+            $id,
+            \PDO::PARAM_INT
+        );
+
+        $statement->execute();
+    }
+
+    public static function delete(int $id): void {
+        $database = Database::connection();
+
+        $statement = $database->prepare(
+            'DELETE FROM users
+             WHERE id = :id'
+        );
+
+        $statement->execute([
+            'id' => $id,
         ]);
     }
 }

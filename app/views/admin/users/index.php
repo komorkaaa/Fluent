@@ -29,10 +29,18 @@
 
                 <?php foreach ($users as $user): ?>
 
+                    <?php
+                    $isCurrentUser =
+                        (int) $user['id'] === (int) ($currentUser['id'] ?? 0);
+
+                    $isBlocked = (bool) $user['is_blocked'];
+                    ?>
+
                     <div class="card">
+
                         <div class="card-body">
 
-                            <div class="row align-items-center g-3">
+                            <div class="row align-items-center g-4">
 
                                 <div class="col-md-1">
                                     <div class="small text-body-secondary">
@@ -80,7 +88,7 @@
                                         Роль
                                     </div>
 
-                                    <?php if ((int) $user['id'] === (int) ($currentUser['id'] ?? 0)): ?>
+                                    <?php if ($isCurrentUser): ?>
 
                                         <span class="badge text-bg-primary">
                                             <?= htmlspecialchars($user['role']) ?>
@@ -93,19 +101,19 @@
                                     <?php else: ?>
 
                                         <form
-                                            method="POST"
-                                            action="/admin/users/<?= (int) $user['id'] ?>/role"
+                                                method="POST"
+                                                action="/admin/users/<?= (int) $user['id'] ?>/role"
                                         >
                                             <div class="d-flex gap-2">
 
                                                 <select
-                                                    name="role"
-                                                    class="form-select form-select-sm"
+                                                        name="role"
+                                                        class="form-select form-select-sm"
                                                 >
                                                     <?php foreach ($roles as $role): ?>
 
                                                         <option
-                                                            value="<?= htmlspecialchars($role) ?>"
+                                                                value="<?= htmlspecialchars($role) ?>"
                                                             <?= $user['role'] === $role ? 'selected' : '' ?>
                                                         >
                                                             <?= htmlspecialchars($role) ?>
@@ -115,8 +123,8 @@
                                                 </select>
 
                                                 <button
-                                                    type="submit"
-                                                    class="btn btn-sm btn-primary"
+                                                        type="submit"
+                                                        class="btn btn-sm btn-primary"
                                                 >
                                                     Сохранить
                                                 </button>
@@ -128,9 +136,97 @@
 
                                 </div>
 
+                                <div class="col-12">
+
+                                    <hr class="my-0">
+
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-3">
+
+                                        <div>
+                                            <span class="small text-body-secondary me-2">
+                                                Статус:
+                                            </span>
+
+                                            <?php if ($isBlocked): ?>
+
+                                                <span class="badge text-bg-danger">
+                                                    Заблокирован
+                                                </span>
+
+                                            <?php else: ?>
+
+                                                <span class="badge text-bg-success">
+                                                    Активен
+                                                </span>
+
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <?php if (!$isCurrentUser): ?>
+
+                                            <div class="d-flex flex-wrap gap-2">
+
+                                                <?php if ($isBlocked): ?>
+
+                                                    <form
+                                                            method="POST"
+                                                            action="/admin/users/<?= (int) $user['id'] ?>/unblock"
+                                                    >
+                                                        <button
+                                                                type="submit"
+                                                                class="btn btn-sm btn-success"
+                                                        >
+                                                            Разблокировать
+                                                        </button>
+                                                    </form>
+
+                                                <?php else: ?>
+
+                                                    <form
+                                                            method="POST"
+                                                            action="/admin/users/<?= (int) $user['id'] ?>/block"
+                                                    >
+                                                        <button
+                                                                type="submit"
+                                                                class="btn btn-sm btn-warning"
+                                                        >
+                                                            Заблокировать
+                                                        </button>
+                                                    </form>
+
+                                                <?php endif; ?>
+
+                                                <form
+                                                        method="POST"
+                                                        action="/admin/users/<?= (int) $user['id'] ?>/delete"
+                                                        onsubmit="return confirm('Удалить этого пользователя?');"
+                                                >
+                                                    <button
+                                                            type="submit"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                    >
+                                                        Удалить
+                                                    </button>
+                                                </form>
+
+                                            </div>
+
+                                        <?php else: ?>
+
+                                            <div class="small text-body-secondary">
+                                                Управление собственной учётной записью недоступно.
+                                            </div>
+
+                                        <?php endif; ?>
+
+                                    </div>
+
+                                </div>
+
                             </div>
 
                         </div>
+
                     </div>
 
                 <?php endforeach; ?>

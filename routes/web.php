@@ -44,6 +44,9 @@ $router->post('/admin/applications/{id}/status', [AdminApplicationsController::c
 $router->post('/admin/applications/{id}/delete', [AdminApplicationsController::class, 'delete']);
 $router->get('/admin/users', [AdminUsersController::class, 'index']);
 $router->post('/admin/users/{id}/role', [AdminUsersController::class, 'updateRole']);
+$router->post('/admin/users/{id}/block', [AdminUsersController::class, 'block']);
+$router->post('/admin/users/{id}/unblock', [AdminUsersController::class, 'unblock']);
+$router->post('/admin/users/{id}/delete', [AdminUsersController::class, 'delete']);
 
 // ====== other ======
 $router->get('/about', [PagesController::class, 'about']);

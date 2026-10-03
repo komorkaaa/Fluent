@@ -101,6 +101,8 @@ class AuthController extends Controller {
                 !password_verify($password, $user['password'])
             ) {
                 $errors[] = 'Неверный email или пароль.';
+            } elseif ((bool) $user['is_blocked']) {
+                $errors[] = 'Ваша учетная запись заблокирована.';
             }
         }
 

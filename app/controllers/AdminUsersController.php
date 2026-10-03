@@ -28,34 +28,16 @@ class AdminUsersController extends AdminController {
 
         $currentUser = Auth::user();
 
-        $user = null;
-
-        foreach (User::all() as $item) {
-            if ((int) $item['id'] === $id) {
-                $user = $item;
-                break;
-            }
-        }
+        $user = $this->findUser($id);
 
         if ($user === null) {
-            http_response_code(404);
-
-            $this->view('errors/404', [
-                'title' => 'Пользователь не найден — Fluent',
-            ]);
+            $this->showNotFound();
 
             return;
         }
 
-        if (
-            $currentUser !== null &&
-            (int) $currentUser['id'] === $id
-        ) {
-            http_response_code(400);
-
-            $this->view('errors/403', [
-                'title' => 'Нельзя изменить свою роль — Fluent',
-            ]);
+        if ($this->isCurrentUser($currentUser, $id)) {
+            $this->showForbidden('Нельзя изменить свою роль — Fluent');
 
             return;
         }
@@ -74,5 +56,106 @@ class AdminUsersController extends AdminController {
 
         header('Location: /admin/users');
         exit;
+    }
+
+    public function block(int $id): void {
+        $this->requireAdmin();
+
+        $currentUser = Auth::user();
+
+        $user = $this->findUser($id);
+
+        if ($user === null) {
+            $this->showNotFound();
+
+            return;
+        }
+
+        if ($this->isCurrentUser($currentUser, $id)) {
+            $this->showForbidden('Нельзя заблокировать себя — Fluent');
+
+            return;
+        }
+
+        User::setBlocked($id, true);
+
+        header('Location: /admin/users');
+        exit;
+    }
+
+    public function unblock(int $id): void {
+        $this->requireAdmin();
+
+        $user = $this->findUser($id);
+
+        if ($user === null) {
+            $this->showNotFound();
+
+            return;
+        }
+
+        User::setBlocked($id, false);
+
+        header('Location: /admin/users');
+        exit;
+    }
+
+    public function delete(int $id): void {
+        $this->requireAdmin();
+
+        $currentUser = Auth::user();
+
+        $user = $this->findUser($id);
+
+        if ($user === null) {
+            $this->showNotFound();
+
+            return;
+        }
+
+        if ($this->isCurrentUser($currentUser, $id)) {
+            $this->showForbidden('Нельзя удалить себя — Fluent');
+
+            return;
+        }
+
+        User::delete($id);
+
+        header('Location: /admin/users');
+        exit;
+    }
+
+    private function findUser(int $id): ?array {
+        foreach (User::all() as $user) {
+            if ((int) $user['id'] === $id) {
+                return $user;
+            }
+        }
+
+        return null;
+    }
+
+    private function isCurrentUser(
+        ?array $currentUser,
+        int $id
+    ): bool {
+        return $currentUser !== null
+            && (int) $currentUser['id'] === $id;
+    }
+
+    private function showNotFound(): void {
+        http_response_code(404);
+
+        $this->view('errors/404', [
+            'title' => 'Пользователь не найден — Fluent',
+        ]);
+    }
+
+    private function showForbidden(string $title): void {
+        http_response_code(400);
+
+        $this->view('errors/403', [
+            'title' => $title,
+        ]);
     }
 }
