@@ -1,219 +1,202 @@
-<section class="py-5">
+<?php
+/** @var array $courses */
+/** @var array $languages */
+/** @var array $levels */
+/** @var array $formats */
+/** @var array $filters */
+/** @var string $sort */
+/** @var array $sorts */
+
+$hasFilters = $filters['q'] !== ''
+    || $filters['language_id'] !== null
+    || $filters['level_id'] !== null
+    || $filters['format_id'] !== null
+    || $filters['price_min'] !== null
+    || $filters['price_max'] !== null;
+
+$total = count($courses);
+?>
+
+<section class="page-head">
     <div class="container">
+        <h1>Каталог курсов</h1>
+        <p>Выберите язык, уровень и формат — остальное мы возьмём на себя.</p>
+    </div>
+</section>
 
-        <div class="mb-5">
-            <h1 class="display-5 fw-bold">
-                Курсы
-            </h1>
+<section class="section">
+    <div class="container">
+        <div class="row g-4 g-xl-5">
 
-            <p class="lead text-body-secondary">
-                Выберите подходящий курс иностранного языка.
-            </p>
-        </div>
+            <div class="col-lg-4 col-xl-3">
+                <form method="GET" action="/courses" class="filter-panel">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h2 class="mb-lg-4">Подбор курса</h2>
 
-        <div class="card mb-5">
-            <div class="card-body">
-
-                <h2 class="h5 mb-4">
-                    Фильтры и сортировка
-                </h2>
-
-                <form method="GET" action="/courses">
-
-                    <div class="row g-3">
-
-                        <div class="col-md-4">
-                            <label for="language" class="form-label">
-                                Язык
-                            </label>
-
-                            <select
-                                name="language"
-                                id="language"
-                                class="form-select"
-                            >
-                                <option value="">Все языки</option>
-
-                                <?php foreach ($languages as $item): ?>
-                                    <option
-                                            value="<?= htmlspecialchars($item) ?>"
-                                            <?= $language === $item ? 'selected' : '' ?>
-                                    >
-                                        <?= htmlspecialchars($item) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label for="level" class="form-label">
-                                Уровень
-                            </label>
-
-                            <select
-                                name="level"
-                                id="level"
-                                class="form-select"
-                            >
-                                <option value="">Все уровни</option>
-
-                                <?php foreach ($levels as $item): ?>
-                                    <option
-                                            value="<?= htmlspecialchars($item) ?>"
-                                            <?= $level === $item ? 'selected' : '' ?>
-                                    >
-                                        <?= htmlspecialchars($item) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label for="format" class="form-label">
-                                Формат
-                            </label>
-
-                            <select
-                                name="format"
-                                id="format"
-                                class="form-select"
-                            >
-                                <option value="">Любой формат</option>
-
-                                <?php foreach ($formats as $item): ?>
-                                    <option
-                                            value="<?= htmlspecialchars($item) ?>"
-                                            <?= $format === $item ? 'selected' : '' ?>
-                                    >
-                                        <?= htmlspecialchars($item) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="col-md-8">
-                            <label for="sort" class="form-label">
-                                Сортировка
-                            </label>
-
-                            <select
-                                name="sort"
-                                id="sort"
-                                class="form-select"
-                            >
-                                <option
-                                    value="date_desc"
-                                    <?= $sort === 'date_desc' ? 'selected' : '' ?>
-                                >
-                                    Сначала новые
-                                </option>
-
-                                <option
-                                    value="price_asc"
-                                    <?= $sort === 'price_asc' ? 'selected' : '' ?>
-                                >
-                                    Цена: по возрастанию
-                                </option>
-
-                                <option
-                                    value="price_desc"
-                                    <?= $sort === 'price_desc' ? 'selected' : '' ?>
-                                >
-                                    Цена: по убыванию
-                                </option>
-
-                                <option
-                                    value="name_asc"
-                                    <?= $sort === 'name_asc' ? 'selected' : '' ?>
-                                >
-                                    По названию
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button
-                                type="submit"
-                                class="btn btn-primary w-100"
-                            >
-                                Применить
-                            </button>
-                        </div>
-
-                    </div>
-
-                </form>
-
-            </div>
-        </div>
-
-        <div class="row g-4">
-
-            <?php foreach ($courses as $course): ?>
-
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 course-card">
-
-                        <img
-                                src="<?= htmlspecialchars($course['image'] ?: '/images/course-placeholder.svg') ?>"
-                                class="card-img-top"
-                                alt="<?= htmlspecialchars($course['name']) ?>"
-                                style="height: 220px; object-fit: cover;"
+                        <button
+                            class="btn btn-outline-primary btn-sm d-lg-none"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#filterFields"
+                            aria-expanded="<?= $hasFilters ? 'true' : 'false' ?>"
+                            aria-controls="filterFields"
                         >
-
-                        <div class="card-body d-flex flex-column">
-
-                            <h2 class="card-title h4">
-                                <?= htmlspecialchars($course['name']) ?>
-                            </h2>
-
-                            <p class="card-text text-body-secondary">
-                                <?= htmlspecialchars($course['description']) ?>
-                            </p>
-
-                            <div class="mb-3">
-                                <span class="badge text-bg-secondary">
-                                    <?= htmlspecialchars($course['language']) ?>
-                                </span>
-
-                                <span class="badge text-bg-light">
-                                    <?= htmlspecialchars($course['level']) ?>
-                                </span>
-
-                                <span class="badge text-bg-light">
-                                    <?= htmlspecialchars($course['format']) ?>
-                                </span>
-                            </div>
-
-                            <div class="mt-auto">
-
-                                <p class="fs-4 fw-bold mb-3">
-                                    <?= htmlspecialchars($course['price']) ?> ₽
-                                </p>
-
-                                <a
-                                    href="/courses/<?= (int) $course['id'] ?>"
-                                    class="btn btn-primary"
-                                >
-                                    Подробнее
-                                </a>
-
-                            </div>
-
-                        </div>
-
+                            <?= icon('search') ?> Фильтры
+                        </button>
                     </div>
-                </div>
 
-            <?php endforeach; ?>
+                    <div class="collapse d-lg-block mt-3 mt-lg-0 <?= $hasFilters ? 'show' : '' ?>" id="filterFields">
+
+                    <div class="mb-3">
+                        <label for="q" class="form-label">Поиск</label>
+                        <input
+                            type="search"
+                            class="form-control"
+                            id="q"
+                            name="q"
+                            maxlength="100"
+                            placeholder="Например, IELTS"
+                            value="<?= e($filters['q']) ?>"
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="language" class="form-label">Язык</label>
+                        <select name="language" id="language" class="form-select">
+                            <option value="">Все языки</option>
+                            <?php foreach ($languages as $item): ?>
+                                <option
+                                    value="<?= (int) $item['id'] ?>"
+                                    <?= (int) $filters['language_id'] === (int) $item['id'] ? 'selected' : '' ?>
+                                >
+                                    <?= e($item['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="level" class="form-label">Уровень</label>
+                        <select name="level" id="level" class="form-select">
+                            <option value="">Все уровни</option>
+                            <?php foreach ($levels as $item): ?>
+                                <option
+                                    value="<?= (int) $item['id'] ?>"
+                                    <?= (int) $filters['level_id'] === (int) $item['id'] ? 'selected' : '' ?>
+                                >
+                                    <?= e($item['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="format" class="form-label">Формат</label>
+                        <select name="format" id="format" class="form-select">
+                            <option value="">Любой формат</option>
+                            <?php foreach ($formats as $item): ?>
+                                <option
+                                    value="<?= (int) $item['id'] ?>"
+                                    <?= (int) $filters['format_id'] === (int) $item['id'] ? 'selected' : '' ?>
+                                >
+                                    <?= e($item['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <fieldset class="mb-3">
+                        <legend class="form-label fs-6">Цена, ₽</legend>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    name="price_min"
+                                    min="0"
+                                    step="100"
+                                    placeholder="от"
+                                    aria-label="Цена от"
+                                    value="<?= $filters['price_min'] !== null ? e($filters['price_min']) : '' ?>"
+                                >
+                            </div>
+                            <div class="col-6">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    name="price_max"
+                                    min="0"
+                                    step="100"
+                                    placeholder="до"
+                                    aria-label="Цена до"
+                                    value="<?= $filters['price_max'] !== null ? e($filters['price_max']) : '' ?>"
+                                >
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="mb-4">
+                        <label for="sort" class="form-label">Сортировка</label>
+                        <select name="sort" id="sort" class="form-select">
+                            <?php foreach ($sorts as $key => $label): ?>
+                                <option
+                                    value="<?= e($key) ?>"
+                                    <?= $sort === $key ? 'selected' : '' ?>
+                                >
+                                    <?= e($label) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Показать курсы</button>
+
+                        <?php if ($hasFilters || $sort !== 'date_desc'): ?>
+                            <a href="/courses" class="btn btn-outline-secondary">Сбросить</a>
+                        <?php endif; ?>
+                    </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-lg-8 col-xl-9">
+                <p class="text-body-secondary fw-semibold mb-4" aria-live="polite">
+                    Найдено: <?= $total ?> <?= plural($total, 'курс', 'курса', 'курсов') ?>
+                </p>
+
+                <?php if ($courses === []): ?>
+
+                    <div class="empty-state">
+                        <svg viewBox="0 0 140 110" aria-hidden="true">
+                            <circle cx="70" cy="55" r="48" fill="#d8e8ff"/>
+                            <rect x="34" y="34" width="72" height="42" rx="21" fill="#fff"/>
+                            <path d="M52 74l-8 18 22-14z" fill="#fff"/>
+                            <circle cx="56" cy="55" r="4" fill="#2f7bff"/>
+                            <circle cx="70" cy="55" r="4" fill="#2f7bff"/>
+                            <circle cx="84" cy="55" r="4" fill="#2f7bff"/>
+                        </svg>
+
+                        <h2 class="h4">Ничего не нашлось</h2>
+                        <p class="text-body-secondary mb-4">
+                            Попробуйте изменить параметры или сбросить фильтры.
+                        </p>
+                        <a href="/courses" class="btn btn-primary">Показать все курсы</a>
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="row g-4">
+                        <?php foreach ($courses as $course): ?>
+                            <div class="col-md-6 col-xxl-4">
+                                <?php partial('course-card', ['course' => $course]); ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                <?php endif; ?>
+            </div>
 
         </div>
-
-        <?php if ($courses === []): ?>
-            <div class="alert alert-secondary mt-4">
-                По выбранным параметрам курсы не найдены.
-            </div>
-        <?php endif; ?>
-
     </div>
 </section>

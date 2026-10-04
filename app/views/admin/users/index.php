@@ -1,263 +1,106 @@
-<section class="py-5">
+<?php
+/** @var array $users */
+/** @var array|null $currentUser */
+?>
+
+<section class="page-head pb-4">
     <div class="container">
+        <h1>Пользователи</h1>
+        <p>Зарегистрированные пользователи: блокировка, разблокировка и удаление.</p>
+    </div>
+</section>
 
-        <div class="mb-4">
-            <h1 class="display-6 fw-bold">
-                Пользователи
-            </h1>
+<section class="section pt-4">
+    <div class="container">
+        <?php partial('admin-nav'); ?>
 
-            <p class="text-body-secondary">
-                Просмотр зарегистрированных пользователей и управление их ролями.
-            </p>
-        </div>
+        <div class="table-wrap">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Пользователь</th>
+                        <th scope="col">Роль</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Заявок</th>
+                        <th scope="col">Регистрация</th>
+                        <th scope="col"><span class="visually-hidden">Действия</span></th>
+                    </tr>
+                    </thead>
 
-        <div class="mb-4">
-            <a href="/admin" class="btn btn-outline-secondary">
-                ← Панель администратора
-            </a>
-        </div>
+                    <tbody>
+                    <?php foreach ($users as $account): ?>
+                        <?php
+                        $isSelf = (int) $account['id'] === (int) ($currentUser['id'] ?? 0);
+                        $isBlocked = (bool) $account['is_blocked'];
+                        ?>
+                        <tr>
+                            <td class="text-body-secondary"><?= (int) $account['id'] ?></td>
 
-        <?php if ($users === []): ?>
+                            <td>
+                                <a href="/admin/users/<?= (int) $account['id'] ?>" class="fw-bold text-decoration-none">
+                                    <?= e($account['name']) ?>
+                                </a>
+                                <?php if ($isSelf): ?><span class="chip ms-1">это вы</span><?php endif; ?>
+                                <div class="small text-body-secondary text-break"><?= e($account['email']) ?></div>
+                            </td>
 
-            <div class="alert alert-info">
-                Пользователей пока нет.
-            </div>
+                            <td>
+                                <?= $account['role'] === 'admin'
+                                    ? '<span class="chip chip-yellow">Администратор</span>'
+                                    : '<span class="chip">Пользователь</span>' ?>
+                            </td>
 
-        <?php else: ?>
+                            <td>
+                                <?= $isBlocked
+                                    ? '<span class="status-badge status-rejected">Заблокирован</span>'
+                                    : '<span class="status-badge status-confirmed">Активен</span>' ?>
+                            </td>
 
-            <div class="d-flex flex-column gap-3">
+                            <td><?= (int) $account['applications_count'] ?></td>
+                            <td class="text-nowrap"><?= e(format_date($account['created_at'], false)) ?></td>
 
-                <?php foreach ($users as $user): ?>
+                            <td>
+                                <div class="d-flex justify-content-end flex-wrap gap-2">
+                                    <a
+                                        href="/admin/users/<?= (int) $account['id'] ?>"
+                                        class="btn btn-outline-primary btn-sm"
+                                    >
+                                        <?= icon('eye') ?> Открыть
+                                    </a>
 
-                    <?php
-                    $isCurrentUser =
-                        (int) $user['id'] === (int) ($currentUser['id'] ?? 0);
-
-                    $isBlocked = (bool) $user['is_blocked'];
-                    ?>
-
-                    <div class="card">
-
-                        <div class="card-body">
-
-                            <div class="row align-items-center g-4">
-
-                                <div class="col-md-1">
-                                    <div class="small text-body-secondary">
-                                        ID
-                                    </div>
-
-                                    <div class="fw-semibold">
-                                        <?= (int) $user['id'] ?>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <div class="small text-body-secondary">
-                                        Имя
-                                    </div>
-
-                                    <div>
-                                        <?= htmlspecialchars($user['name']) ?>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <div class="small text-body-secondary">
-                                        Email
-                                    </div>
-
-                                    <div class="text-break">
-                                        <?= htmlspecialchars($user['email']) ?>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-2">
-                                    <div class="small text-body-secondary">
-                                        Регистрация
-                                    </div>
-
-                                    <div>
-                                        <?= htmlspecialchars($user['created_at']) ?>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-
-                                    <div class="small text-body-secondary mb-1">
-                                        Роль
-                                    </div>
-
-                                    <?php if ($isCurrentUser): ?>
-
-                                        <span class="badge text-bg-primary">
-                                            <?= htmlspecialchars($user['role']) ?>
-                                        </span>
-
-                                        <div class="small text-body-secondary mt-1">
-                                            Ваша учётная запись
-                                        </div>
-
-                                    <?php else: ?>
+                                    <?php if (!$isSelf): ?>
 
                                         <form
-                                                method="POST"
-                                                action="/admin/users/<?= (int) $user['id'] ?>
-
-                                <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
-                                >/role"
+                                            method="POST"
+                                            action="/admin/users/<?= (int) $account['id'] ?>/<?= $isBlocked ? 'unblock' : 'block' ?>"
                                         >
-                                            <div class="d-flex gap-2">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                                <?= $isBlocked ? 'Разблокировать' : 'Заблокировать' ?>
+                                            </button>
+                                        </form>
 
-                                                <select
-                                                        name="role"
-                                                        class="form-select form-select-sm"
-                                                >
-                                                    <?php foreach ($roles as $role): ?>
-
-                                                        <option
-                                                                value="<?= htmlspecialchars($role) ?>"
-                                                            <?= $user['role'] === $role ? 'selected' : '' ?>
-                                                        >
-                                                            <?= htmlspecialchars($role) ?>
-                                                        </option>
-
-                                                    <?php endforeach; ?>
-                                                </select>
-
-                                                <button
-                                                        type="submit"
-                                                        class="btn btn-sm btn-primary"
-                                                >
-                                                    Сохранить
-                                                </button>
-
-                                            </div>
+                                        <form
+                                            method="POST"
+                                            action="/admin/users/<?= (int) $account['id'] ?>/delete"
+                                            data-confirm="Удалить пользователя «<?= e($account['name']) ?>»? Его заявки сохранятся как гостевые."
+                                        >
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm text-danger" aria-label="Удалить пользователя <?= e($account['name']) ?>">
+                                                <?= icon('trash') ?>
+                                            </button>
                                         </form>
 
                                     <?php endif; ?>
-
                                 </div>
-
-                                <div class="col-12">
-
-                                    <hr class="my-0">
-
-                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-3">
-
-                                        <div>
-                                            <span class="small text-body-secondary me-2">
-                                                Статус:
-                                            </span>
-
-                                            <?php if ($isBlocked): ?>
-
-                                                <span class="badge text-bg-danger">
-                                                    Заблокирован
-                                                </span>
-
-                                            <?php else: ?>
-
-                                                <span class="badge text-bg-success">
-                                                    Активен
-                                                </span>
-
-                                            <?php endif; ?>
-                                        </div>
-
-                                        <?php if (!$isCurrentUser): ?>
-
-                                            <div class="d-flex flex-wrap gap-2">
-
-                                                <?php if ($isBlocked): ?>
-
-                                                    <form
-                                                            method="POST"
-                                                            action="/admin/users/<?= (int) $user['id'] ?>
-
-                                <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
-                                >/unblock"
-                                                    >
-                                                        <button
-                                                                type="submit"
-                                                                class="btn btn-sm btn-success"
-                                                        >
-                                                            Разблокировать
-                                                        </button>
-                                                    </form>
-
-                                                <?php else: ?>
-
-                                                    <form
-                                                            method="POST"
-                                                            action="/admin/users/<?= (int) $user['id'] ?>
-
-                                <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
-                                >/block"
-                                                    >
-                                                        <button
-                                                                type="submit"
-                                                                class="btn btn-sm btn-warning"
-                                                        >
-                                                            Заблокировать
-                                                        </button>
-                                                    </form>
-
-                                                <?php endif; ?>
-
-                                                <form
-                                                        method="POST"
-                                                        action="/admin/users/<?= (int) $user['id'] ?>
-
-                                <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
-                                >/delete"
-                                                        onsubmit="return confirm('Удалить этого пользователя?');"
-                                                >
-                                                    <button
-                                                            type="submit"
-                                                            class="btn btn-sm btn-outline-danger"
-                                                    >
-                                                        Удалить
-                                                    </button>
-                                                </form>
-
-                                            </div>
-
-                                        <?php else: ?>
-
-                                            <div class="small text-body-secondary">
-                                                Управление собственной учётной записью недоступно.
-                                            </div>
-
-                                        <?php endif; ?>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                <?php endforeach; ?>
-
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
-
-        <?php endif; ?>
-
+        </div>
     </div>
 </section>

@@ -1,147 +1,132 @@
-<section class="py-5">
+<?php
+/** @var array $user */
+/** @var array $applications */
+/** @var array $errors */
+/** @var array $old */
+
+$initial = mb_strtoupper(mb_substr($user['name'], 0, 1));
+?>
+
+<section class="page-head">
     <div class="container">
-
-        <div class="mb-5">
-            <h1 class="display-5 fw-bold">
-                Личный кабинет
-            </h1>
-
-            <p class="lead text-body-secondary">
-                Добро пожаловать, <?= htmlspecialchars($user['name']) ?>.
-            </p>
-        </div>
-
-        <div class="card mb-5">
-            <div class="card-body">
-
-                <h2 class="h5 mb-4">
-                    Профиль
-                </h2>
-
-                <?php if (!empty($errors)): ?>
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            <?php foreach ($errors as $error): ?>
-                                <li>
-                                    <?= htmlspecialchars($error) ?>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-
-                <form method="POST" action="/profile">
-
-                                <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
-                                >
-
-                    <div class="mb-3">
-                        <label for="name" class="form-label">
-                            Имя
-                        </label>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="name"
-                            name="name"
-                            value="<?= htmlspecialchars($user['name']) ?>"
-                            required
-                        >
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="email" class="form-label">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            class="form-control"
-                            id="email"
-                            name="email"
-                            value="<?= htmlspecialchars($user['email']) ?>"
-                            required
-                        >
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        Сохранить изменения
-                    </button>
-
-                </form>
-
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar" aria-hidden="true"><?= e($initial) ?></div>
+                <div>
+                    <h1 class="mb-1">Личный кабинет</h1>
+                    <p><?= e($user['name']) ?> · <?= e($user['email']) ?></p>
+                </div>
             </div>
+
+            <form method="POST" action="/logout">
+                <?= csrf_field() ?>
+                <button type="submit" class="btn btn-outline-secondary">
+                    <?= icon('logout') ?> Выйти из аккаунта
+                </button>
+            </form>
         </div>
+    </div>
+</section>
 
-        <div>
-            <h2 class="h4 mb-4">
-                Мои заявки
-            </h2>
+<section class="section">
+    <div class="container">
+        <div class="row g-4 g-xl-5">
 
-            <?php if ($applications === []): ?>
+            <div class="col-lg-4">
+                <div class="account-card">
+                    <h2 class="h4 mb-4">Мои данные</h2>
 
-                <div class="alert alert-secondary">
-                    У вас пока нет заявок.
+                    <?php partial('errors', ['errors' => $errors ?? []]); ?>
+
+                    <form method="POST" action="/profile" novalidate>
+                        <?= csrf_field() ?>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Имя</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="name"
+                                name="name"
+                                maxlength="255"
+                                value="<?= e($old['name'] ?? $user['name']) ?>"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="email" class="form-label">E-mail</label>
+                            <input
+                                type="email"
+                                class="form-control"
+                                id="email"
+                                name="email"
+                                maxlength="255"
+                                value="<?= e($old['email'] ?? $user['email']) ?>"
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Сохранить изменения
+                        </button>
+                    </form>
                 </div>
+            </div>
 
-            <?php else: ?>
+            <div class="col-lg-8">
+                <h2 class="h3 mb-4">Мои заявки</h2>
 
-                <div class="table-responsive">
+                <?php if ($applications === []): ?>
 
-                    <table class="table table-bordered align-middle">
+                    <div class="empty-state">
+                        <h3 class="h4">Заявок пока нет</h3>
+                        <p class="text-body-secondary mb-4">
+                            Выберите курс в каталоге и оставьте первую заявку.
+                        </p>
+                        <a href="/courses" class="btn btn-primary">Перейти в каталог</a>
+                    </div>
 
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Курс</th>
-                            <th>Дата</th>
-                            <th>Статус</th>
-                        </tr>
-                        </thead>
+                <?php else: ?>
 
-                        <tbody>
+                    <div class="table-wrap">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                <tr>
+                                    <th scope="col">№</th>
+                                    <th scope="col">Курс</th>
+                                    <th scope="col">Дата</th>
+                                    <th scope="col">Статус</th>
+                                    <th scope="col"><span class="visually-hidden">Действия</span></th>
+                                </tr>
+                                </thead>
 
-                        <?php foreach ($applications as $application): ?>
+                                <tbody>
+                                <?php foreach ($applications as $application): ?>
+                                    <tr>
+                                        <td class="fw-bold">#<?= (int) $application['id'] ?></td>
+                                        <td><?= e($application['course_name']) ?></td>
+                                        <td class="text-nowrap"><?= e(format_date($application['created_at'])) ?></td>
+                                        <td><?= status_badge($application['status']) ?></td>
+                                        <td class="text-end">
+                                            <a
+                                                href="/profile/applications/<?= (int) $application['id'] ?>"
+                                                class="btn btn-outline-primary btn-sm"
+                                            >
+                                                Подробнее
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                            <tr>
-                                <td>
-                                    #<?= (int) $application['id'] ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $application['course_name']
-                                    ) ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $application['created_at']
-                                    ) ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $application['status']
-                                    ) ?>
-                                </td>
-                            </tr>
-
-                        <?php endforeach; ?>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
 
         </div>
-
     </div>
 </section>

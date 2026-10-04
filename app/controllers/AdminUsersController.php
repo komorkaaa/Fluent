@@ -3,22 +3,34 @@
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Models\Application;
 use App\Models\User;
 
 class AdminUsersController extends AdminController {
     private const ROLES = [
-        'user',
-        'admin',
+        'user' => 'Пользователь',
+        'admin' => 'Администратор',
     ];
 
     public function index(): void {
         $this->requireAdmin();
 
-        $users = User::all();
-
         $this->view('admin/users/index', [
             'title' => 'Пользователи — Fluent',
-            'users' => $users,
+            'users' => User::all(),
+            'currentUser' => Auth::user(),
+        ]);
+    }
+
+    public function show(int $id): void {
+        $this->requireAdmin();
+
+        $user = $this->findOrFail($id);
+
+        $this->view('admin/users/show', [
+            'title' => $user['name'] . ' — Fluent',
+            'account' => $user,
+            'applications' => Application::findByUserId($id),
             'roles' => self::ROLES,
             'currentUser' => Auth::user(),
         ]);
@@ -28,139 +40,82 @@ class AdminUsersController extends AdminController {
         $this->verifyCsrf();
         $this->requireAdmin();
 
-        $currentUser = Auth::user();
+        $this->findOrFail($id);
+        $this->denyForSelf($id, 'Нельзя изменить свою роль — Fluent');
 
-        $user = $this->findUser($id);
+        $role = $this->input($_POST, 'role');
 
-        if ($user === null) {
-            $this->showNotFound();
-
-            return;
-        }
-
-        if ($this->isCurrentUser($currentUser, $id)) {
-            $this->showForbidden('Нельзя изменить свою роль — Fluent');
-
-            return;
-        }
-
-        $role = trim($_POST['role'] ?? '');
-
-        if (!in_array($role, self::ROLES, true)) {
-            http_response_code(400);
-
-            echo 'Некорректная роль';
-
-            return;
+        if (!array_key_exists($role, self::ROLES)) {
+            $this->flash('danger', 'Выберите корректную роль.');
+            $this->redirect('/admin/users/' . $id);
         }
 
         User::updateRole($id, $role);
 
-        header('Location: /admin/users');
-        exit;
+        $this->flash('success', 'Роль пользователя изменена.');
+        $this->redirect('/admin/users/' . $id);
     }
 
     public function block(int $id): void {
         $this->verifyCsrf();
         $this->requireAdmin();
 
-        $currentUser = Auth::user();
-
-        $user = $this->findUser($id);
-
-        if ($user === null) {
-            $this->showNotFound();
-
-            return;
-        }
-
-        if ($this->isCurrentUser($currentUser, $id)) {
-            $this->showForbidden('Нельзя заблокировать себя — Fluent');
-
-            return;
-        }
+        $this->findOrFail($id);
+        $this->denyForSelf($id, 'Нельзя заблокировать себя — Fluent');
 
         User::setBlocked($id, true);
 
-        header('Location: /admin/users');
-        exit;
+        $this->flash('success', 'Пользователь заблокирован.');
+        $this->redirect($this->backTo($id));
     }
 
     public function unblock(int $id): void {
         $this->verifyCsrf();
         $this->requireAdmin();
 
-        $user = $this->findUser($id);
-
-        if ($user === null) {
-            $this->showNotFound();
-
-            return;
-        }
+        $this->findOrFail($id);
 
         User::setBlocked($id, false);
 
-        header('Location: /admin/users');
-        exit;
+        $this->flash('success', 'Пользователь разблокирован.');
+        $this->redirect($this->backTo($id));
     }
 
     public function delete(int $id): void {
         $this->verifyCsrf();
         $this->requireAdmin();
 
-        $currentUser = Auth::user();
-
-        $user = $this->findUser($id);
-
-        if ($user === null) {
-            $this->showNotFound();
-
-            return;
-        }
-
-        if ($this->isCurrentUser($currentUser, $id)) {
-            $this->showForbidden('Нельзя удалить себя — Fluent');
-
-            return;
-        }
+        $this->findOrFail($id);
+        $this->denyForSelf($id, 'Нельзя удалить себя — Fluent');
 
         User::delete($id);
 
-        header('Location: /admin/users');
-        exit;
+        $this->flash('success', 'Пользователь удалён.');
+        $this->redirect('/admin/users');
     }
 
-    private function findUser(int $id): ?array {
-        foreach (User::all() as $user) {
-            if ((int) $user['id'] === $id) {
-                return $user;
-            }
+    private function findOrFail(int $id): array {
+        $user = User::find($id);
+
+        if ($user === null) {
+            $this->abortNotFound('Пользователь не найден — Fluent');
         }
 
-        return null;
+        return $user;
     }
 
-    private function isCurrentUser(
-        ?array $currentUser,
-        int $id
-    ): bool {
-        return $currentUser !== null
-            && (int) $currentUser['id'] === $id;
+    private function denyForSelf(int $id, string $title): void {
+        $currentUser = Auth::user();
+
+        if ($currentUser !== null && (int) $currentUser['id'] === $id) {
+            $this->abortForbidden($title);
+        }
     }
 
-    private function showNotFound(): void {
-        http_response_code(404);
-
-        $this->view('errors/404', [
-            'title' => 'Пользователь не найден — Fluent',
-        ]);
-    }
-
-    private function showForbidden(string $title): void {
-        http_response_code(403);
-
-        $this->view('errors/403', [
-            'title' => $title,
-        ]);
+    /** Возврат на карточку пользователя, если действие выполнялось оттуда. */
+    private function backTo(int $id): string {
+        return ($_POST['back'] ?? '') === 'show'
+            ? '/admin/users/' . $id
+            : '/admin/users';
     }
 }

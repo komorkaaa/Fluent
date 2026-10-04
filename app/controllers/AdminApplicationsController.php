@@ -6,35 +6,15 @@ use App\Models\Application;
 use App\Models\User;
 
 class AdminApplicationsController extends AdminController {
-    private const STATUSES = [
-        'Новая',
-        'В обработке',
-        'Подтверждена',
-        'Отклонена',
-        'Завершена',
-    ];
-
     public function index(): void {
         $this->requireAdmin();
 
         $filters = [
-            'user_id' => trim($_GET['user_id'] ?? ''),
-            'status' => trim($_GET['status'] ?? ''),
-            'date_from' => trim($_GET['date_from'] ?? ''),
-            'date_to' => trim($_GET['date_to'] ?? ''),
+            'user_id' => $this->intOrNull($this->input($_GET, 'user_id')),
+            'status_id' => $this->intOrNull($this->input($_GET, 'status_id')),
+            'date_from' => $this->validDate($this->input($_GET, 'date_from')),
+            'date_to' => $this->validDate($this->input($_GET, 'date_to')),
         ];
-
-        if (!in_array($filters['status'], self::STATUSES, true)) {
-            $filters['status'] = '';
-        }
-
-        if (!$this->isValidDate($filters['date_from'])) {
-            $filters['date_from'] = '';
-        }
-
-        if (!$this->isValidDate($filters['date_to'])) {
-            $filters['date_to'] = '';
-        }
 
         if (
             $filters['date_from'] !== ''
@@ -47,83 +27,75 @@ class AdminApplicationsController extends AdminController {
             ];
         }
 
-        $users = User::all();
-        $applications = Application::all($filters);
-
         $this->view('admin/applications/index', [
             'title' => 'Заявки — Fluent',
-            'applications' => $applications,
-            'statuses' => self::STATUSES,
-            'users' => $users,
+            'applications' => Application::all($filters),
+            'statuses' => Application::statuses(),
+            'users' => User::all(),
             'filters' => $filters,
+        ]);
+    }
+
+    public function show(int $id): void {
+        $this->requireAdmin();
+
+        $this->view('admin/applications/show', [
+            'title' => 'Заявка №' . $id . ' — Fluent',
+            'application' => $this->findOrFail($id),
+            'statuses' => Application::statuses(),
         ]);
     }
 
     public function updateStatus(int $id): void {
         $this->verifyCsrf();
-
         $this->requireAdmin();
 
-        $application = Application::find($id);
+        $this->findOrFail($id);
 
-        if ($application === null) {
-            http_response_code(404);
+        $statusId = $this->intOrNull($this->input($_POST, 'status_id'));
 
-            $this->view('errors/404', [
-                'title' => 'Заявка не найдена — Fluent',
-            ]);
-
-            return;
+        if ($statusId === null || !Application::statusExists($statusId)) {
+            $this->flash('danger', 'Выберите корректный статус.');
+            $this->redirect('/admin/applications/' . $id);
         }
 
-        $status = trim($_POST['status'] ?? '');
+        Application::updateStatus($id, $statusId);
 
-        if (!in_array($status, self::STATUSES, true)) {
-            http_response_code(400);
-
-            echo 'Некорректный статус';
-
-            return;
-        }
-
-        Application::updateStatus($id, $status);
-
-        header('Location: /admin/applications');
-        exit;
+        $this->flash('success', 'Статус заявки №' . $id . ' обновлён.');
+        $this->redirect('/admin/applications/' . $id);
     }
 
     public function delete(int $id): void {
         $this->verifyCsrf();
-
         $this->requireAdmin();
 
-        $application = Application::find($id);
-
-        if ($application === null) {
-            http_response_code(404);
-
-            $this->view('errors/404', [
-                'title' => 'Заявка не найдена — Fluent',
-            ]);
-
-            return;
-        }
+        $this->findOrFail($id);
 
         Application::delete($id);
 
-        header('Location: /admin/applications');
-        exit;
+        $this->flash('success', 'Заявка №' . $id . ' удалена.');
+        $this->redirect('/admin/applications');
     }
-    private function isValidDate(string $date): bool {
+
+    private function findOrFail(int $id): array {
+        $application = Application::find($id);
+
+        if ($application === null) {
+            $this->abortNotFound('Заявка не найдена — Fluent');
+        }
+
+        return $application;
+    }
+
+    private function validDate(string $date): string {
         if ($date === '') {
-            return true;
+            return '';
         }
 
         $parsed = \DateTime::createFromFormat('!Y-m-d', $date);
 
-        return $parsed !== false
-            && $parsed->format('Y-m-d') === $date;
+        return $parsed !== false && $parsed->format('Y-m-d') === $date
+            ? $date
+            : '';
     }
-
-
 }

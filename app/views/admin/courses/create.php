@@ -1,153 +1,24 @@
-<section class="py-5">
+<section class="page-head pb-4">
     <div class="container">
+        <a href="/admin/courses" class="breadcrumb-link"><?= icon('arrow-left') ?> Все курсы</a>
+        <h1>Новый курс</h1>
+    </div>
+</section>
 
-        <h1 class="display-6 fw-bold mb-4">
-            Добавление курса
-        </h1>
-
-        <?php if (!empty($errors)): ?>
-
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    <?php foreach ($errors as $error): ?>
-                        <li>
-                            <?= htmlspecialchars($error) ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
+<section class="section pt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-9">
+                <?php partial('course-form', [
+                    'course' => $course,
+                    'errors' => $errors,
+                    'action' => '/admin/courses/create',
+                    'submitLabel' => 'Создать курс',
+                    'languages' => $languages,
+                    'levels' => $levels,
+                    'formats' => $formats,
+                ]); ?>
             </div>
-
-        <?php endif; ?>
-
-        <form method="POST">
-
-                                <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="<?= htmlspecialchars(\App\Core\Auth::csrfToken()) ?>"
-                                >
-
-            <div class="mb-3">
-                <label for="name" class="form-label">
-                    Название
-                </label>
-
-                <input
-                    type="text"
-                    class="form-control"
-                    id="name"
-                    name="name"
-                    value="<?= htmlspecialchars($old['name'] ?? '') ?>"
-                    required
-                >
-            </div>
-
-            <div class="mb-3">
-                <label for="description" class="form-label">
-                    Описание
-                </label>
-
-                <textarea
-                    class="form-control"
-                    id="description"
-                    name="description"
-                    rows="5"
-                    required
-                ><?= htmlspecialchars($old['description'] ?? '') ?></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label for="price" class="form-label">
-                    Цена
-                </label>
-
-                <input
-                    type="number"
-                    class="form-control"
-                    id="price"
-                    name="price"
-                    min="0"
-                    step="0.01"
-                    value="<?= htmlspecialchars($old['price'] ?? '') ?>"
-                    required
-                >
-            </div>
-
-            <div class="mb-3">
-                <label for="language" class="form-label">
-                    Язык
-                </label>
-
-                <input
-                    type="text"
-                    class="form-control"
-                    id="language"
-                    name="language"
-                    value="<?= htmlspecialchars($old['language'] ?? '') ?>"
-                    required
-                >
-            </div>
-
-            <div class="mb-3">
-                <label for="level" class="form-label">
-                    Уровень
-                </label>
-
-                <input
-                    type="text"
-                    class="form-control"
-                    id="level"
-                    name="level"
-                    value="<?= htmlspecialchars($old['level'] ?? '') ?>"
-                    placeholder="Например: Начальный"
-                    required
-                >
-            </div>
-
-            <div class="mb-4">
-                <label for="format" class="form-label">
-                    Формат
-                </label>
-
-                <input
-                        type="text"
-                        class="form-control"
-                        id="format"
-                        name="format"
-                        value="<?= htmlspecialchars($old['format'] ?? '') ?>"
-                        placeholder="Например: Онлайн"
-                        required
-                >
-            </div>
-
-            <div class="mb-4">
-                <label for="image" class="form-label">
-                    Изображение курса
-                </label>
-
-                <input
-                        type="text"
-                        class="form-control"
-                        id="image"
-                        name="image"
-                        value="<?= htmlspecialchars($old['image'] ?? '') ?>"
-                        placeholder="/images/courses/english.jpg"
-                >
-
-                <div class="form-text">
-                    Необязательное поле. Укажи путь к изображению курса.
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">
-                Создать курс
-            </button>
-
-            <a href="/admin/courses" class="btn btn-outline-secondary ms-2">
-                Отмена
-            </a>
-
-        </form>
-
+        </div>
     </div>
 </section>

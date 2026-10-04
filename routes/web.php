@@ -10,7 +10,6 @@ use App\Controllers\AdminCoursesController;
 use App\Controllers\AdminApplicationsController;
 use App\Controllers\AdminUsersController;
 use App\Controllers\PagesController;
-use App\Controllers\ErrorController;
 
 $router->get('/', [HomeController::class, 'index']);
 
@@ -19,6 +18,7 @@ $router->get('/courses', [CoursesController::class, 'index']);
 $router->get('/courses/{id}', [CoursesController::class, 'show']);
 $router->get('/courses/{id}/apply', [ApplicationsController::class, 'create']);
 $router->post('/courses/{id}/apply', [ApplicationsController::class, 'store']);
+$router->get('/applications/success', [ApplicationsController::class, 'success']);
 
 // ====== auth ======
 $router->get('/register', [AuthController::class, 'register']);
@@ -30,19 +30,25 @@ $router->post('/logout', [AuthController::class, 'logout']);
 // ====== profile ======
 $router->get('/profile', [ProfileController::class, 'index']);
 $router->post('/profile', [ProfileController::class, 'update']);
+$router->get('/profile/applications/{id}', [ProfileController::class, 'application']);
 
 // ====== admin ======
 $router->get('/admin', [AdminDashboardController::class, 'index']);
+
 $router->get('/admin/courses', [AdminCoursesController::class, 'index']);
 $router->get('/admin/courses/create', [AdminCoursesController::class, 'create']);
 $router->post('/admin/courses/create', [AdminCoursesController::class, 'store']);
 $router->get('/admin/courses/{id}/edit', [AdminCoursesController::class, 'edit']);
 $router->post('/admin/courses/{id}/edit', [AdminCoursesController::class, 'update']);
 $router->post('/admin/courses/{id}/delete', [AdminCoursesController::class, 'delete']);
+
 $router->get('/admin/applications', [AdminApplicationsController::class, 'index']);
+$router->get('/admin/applications/{id}', [AdminApplicationsController::class, 'show']);
 $router->post('/admin/applications/{id}/status', [AdminApplicationsController::class, 'updateStatus']);
 $router->post('/admin/applications/{id}/delete', [AdminApplicationsController::class, 'delete']);
+
 $router->get('/admin/users', [AdminUsersController::class, 'index']);
+$router->get('/admin/users/{id}', [AdminUsersController::class, 'show']);
 $router->post('/admin/users/{id}/role', [AdminUsersController::class, 'updateRole']);
 $router->post('/admin/users/{id}/block', [AdminUsersController::class, 'block']);
 $router->post('/admin/users/{id}/unblock', [AdminUsersController::class, 'unblock']);

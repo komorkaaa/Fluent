@@ -4,36 +4,42 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Course;
+use App\Models\Lookup;
 
 class CoursesController extends Controller {
     public function index(): void
     {
-        $language = $_GET['language'] ?? null;
-        $level = $_GET['level'] ?? null;
-        $format = $_GET['format'] ?? null;
-        $sort = $_GET['sort'] ?? 'date_desc';
+        $sort = $this->input($_GET, 'sort');
 
-        $courses = Course::all(
-            $language,
-            $level,
-            $format,
-            $sort
-        );
+        if (!array_key_exists($sort, Course::SORTS)) {
+            $sort = 'date_desc';
+        }
 
-        $languages = Course::distinctLanguages();
-        $levels = Course::distinctLevels();
-        $formats = Course::distinctFormats();
+        $priceMin = $this->parsePrice($this->input($_GET, 'price_min'));
+        $priceMax = $this->parsePrice($this->input($_GET, 'price_max'));
+
+        if ($priceMin !== null && $priceMax !== null && $priceMin > $priceMax) {
+            [$priceMin, $priceMax] = [$priceMax, $priceMin];
+        }
+
+        $filters = [
+            'q' => mb_substr($this->input($_GET, 'q'), 0, 100),
+            'language_id' => $this->intOrNull($this->input($_GET, 'language')),
+            'level_id' => $this->intOrNull($this->input($_GET, 'level')),
+            'format_id' => $this->intOrNull($this->input($_GET, 'format')),
+            'price_min' => $priceMin,
+            'price_max' => $priceMax,
+        ];
 
         $this->view('courses/index', [
             'title' => 'Курсы — Fluent',
-            'courses' => $courses,
-            'languages' => $languages,
-            'levels' => $levels,
-            'formats' => $formats,
-            'language' => $language,
-            'level' => $level,
-            'format' => $format,
+            'courses' => Course::all($filters, $sort),
+            'languages' => Lookup::languages(),
+            'levels' => Lookup::levels(),
+            'formats' => Lookup::formats(),
+            'filters' => $filters,
             'sort' => $sort,
+            'sorts' => Course::SORTS,
         ]);
     }
 
@@ -41,24 +47,27 @@ class CoursesController extends Controller {
         $course = Course::find($id);
 
         if ($course === null) {
-            http_response_code(404);
-
-            $this->view('errors/404', [
-                'title' => 'Курс не найден — Fluent',
-            ]);
-
-            return;
+            $this->abortNotFound('Курс не найден — Fluent');
         }
-
-        $similarCourses = Course::similar(
-            (int) $course['id'],
-            $course['language']
-        );
 
         $this->view('courses/show', [
             'title' => $course['name'] . ' — Fluent',
             'course' => $course,
-            'similarCourses' => $similarCourses,
+            'similarCourses' => Course::similar(
+                (int) $course['id'],
+                (int) $course['language_id'],
+                (int) $course['level_id']
+            ),
         ]);
+    }
+
+    private function parsePrice(string $value): ?float {
+        $value = str_replace(',', '.', $value);
+
+        if ($value === '' || !is_numeric($value) || (float) $value < 0) {
+            return null;
+        }
+
+        return min((float) $value, 99999999.99);
     }
 }

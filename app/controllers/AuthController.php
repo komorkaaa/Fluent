@@ -2,12 +2,14 @@
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Controller;
 use App\Models\User;
-use App\Core\Auth;
 
 class AuthController extends Controller {
     public function register(): void {
+        $this->redirectIfAuthenticated();
+
         $this->view('auth/register', [
             'title' => 'Регистрация — Fluent',
         ]);
@@ -15,11 +17,14 @@ class AuthController extends Controller {
 
     public function storeRegister(): void {
         $this->verifyCsrf();
+        $this->redirectIfAuthenticated();
 
-        $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $passwordConfirmation = $_POST['password_confirmation'] ?? '';
+        $name = $this->input($_POST, 'name');
+        $email = mb_strtolower($this->input($_POST, 'email'));
+        $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
+        $passwordConfirmation = is_string($_POST['password_confirmation'] ?? null)
+            ? $_POST['password_confirmation']
+            : '';
 
         $errors = [];
 
@@ -39,16 +44,32 @@ class AuthController extends Controller {
 
         if ($password === '') {
             $errors[] = 'Введите пароль.';
-        } elseif (strlen($password) < 6) {
+        } elseif (mb_strlen($password) < 6) {
             $errors[] = 'Пароль должен содержать минимум 6 символов.';
+        } elseif (strlen($password) > 72) {
+            // bcrypt учитывает только первые 72 байта пароля
+            $errors[] = 'Пароль не должен быть длиннее 72 байт.';
         }
 
         if ($password !== $passwordConfirmation) {
             $errors[] = 'Пароли не совпадают.';
         }
 
-        if (User::findByEmail($email) !== null) {
+        if ($errors === [] && User::findByEmail($email) !== null) {
             $errors[] = 'Пользователь с таким email уже зарегистрирован.';
+        }
+
+        if ($errors === []) {
+            try {
+                User::create($name, $email, $password);
+            } catch (\PDOException $exception) {
+                // 23505 — нарушение уникальности (одновременная регистрация того же email)
+                if ($exception->getCode() !== '23505') {
+                    throw $exception;
+                }
+
+                $errors[] = 'Пользователь с таким email уже зарегистрирован.';
+            }
         }
 
         if ($errors !== []) {
@@ -64,18 +85,13 @@ class AuthController extends Controller {
             return;
         }
 
-        User::create(
-            $name,
-            $email,
-            $password
-        );
-
-        header('Location: /login');
-        exit;
+        $this->flash('success', 'Аккаунт создан. Теперь можно войти.');
+        $this->redirect('/login');
     }
 
-    public function login(): void
-    {
+    public function login(): void {
+        $this->redirectIfAuthenticated();
+
         $this->view('auth/login', [
             'title' => 'Вход — Fluent',
         ]);
@@ -83,9 +99,10 @@ class AuthController extends Controller {
 
     public function storeLogin(): void {
         $this->verifyCsrf();
+        $this->redirectIfAuthenticated();
 
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
+        $email = $this->input($_POST, 'email');
+        $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
 
         $errors = [];
 
@@ -110,7 +127,7 @@ class AuthController extends Controller {
             ) {
                 $errors[] = 'Неверный email или пароль.';
             } elseif ((bool) $user['is_blocked']) {
-                $errors[] = 'Ваша учетная запись заблокирована.';
+                $errors[] = 'Ваша учётная запись заблокирована.';
             }
         }
 
@@ -128,8 +145,7 @@ class AuthController extends Controller {
 
         Auth::login($user);
 
-        header('Location: /');
-        exit;
+        $this->redirect($user['role'] === 'admin' ? '/admin' : '/profile');
     }
 
     public function logout(): void {
@@ -137,7 +153,12 @@ class AuthController extends Controller {
 
         Auth::logout();
 
-        header('Location: /');
-        exit;
+        $this->redirect('/');
+    }
+
+    private function redirectIfAuthenticated(): void {
+        if (Auth::check()) {
+            $this->redirect('/profile');
+        }
     }
 }

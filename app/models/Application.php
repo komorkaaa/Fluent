@@ -5,6 +5,48 @@ namespace App\Models;
 use App\Core\Database;
 
 class Application {
+    public const DEFAULT_STATUS = 'Новая';
+
+    private const SELECT = '
+        SELECT
+            applications.id,
+            applications.course_id,
+            applications.user_id,
+            applications.status_id,
+            applications.name,
+            applications.phone,
+            applications.email,
+            applications.comment,
+            applications.created_at,
+            application_statuses.name AS status,
+            courses.name AS course_name,
+            courses.price AS course_price,
+            users.name AS user_name,
+            users.email AS user_email
+        FROM applications
+        INNER JOIN application_statuses
+            ON application_statuses.id = applications.status_id
+        INNER JOIN courses
+            ON courses.id = applications.course_id
+        LEFT JOIN users
+            ON users.id = applications.user_id
+    ';
+
+    public static function statuses(): array {
+        return Database::connection()
+            ->query('SELECT id, name FROM application_statuses ORDER BY sort_order ASC, id ASC')
+            ->fetchAll();
+    }
+
+    public static function statusExists(int $id): bool {
+        $statement = Database::connection()->prepare(
+            'SELECT 1 FROM application_statuses WHERE id = :id'
+        );
+        $statement->execute(['id' => $id]);
+
+        return (bool) $statement->fetchColumn();
+    }
+
     public static function create(
         int $courseId,
         string $name,
@@ -13,31 +55,24 @@ class Application {
         ?string $comment,
         ?int $userId = null
     ): int {
-        $database = Database::connection();
-
-        $statement = $database->prepare(
+        $statement = Database::connection()->prepare(
             'INSERT INTO applications (
-                course_id,
-                user_id,
-                name,
-                phone,
-                email,
-                comment
-            )
-            VALUES (
+                course_id, user_id, status_id, name, phone, email, comment
+            ) VALUES (
                 :course_id,
                 :user_id,
+                (SELECT id FROM application_statuses WHERE name = :status),
                 :name,
                 :phone,
                 :email,
                 :comment
-            )
-            RETURNING id'
+            ) RETURNING id'
         );
 
         $statement->execute([
             'course_id' => $courseId,
             'user_id' => $userId,
+            'status' => self::DEFAULT_STATUS,
             'name' => $name,
             'phone' => $phone,
             'email' => $email,
@@ -48,68 +83,46 @@ class Application {
     }
 
     public static function findByUserId(int $userId): array {
-        $database = Database::connection();
-
-        $statement = $database->prepare(
-            'SELECT
-                applications.id,
-                applications.name,
-                applications.email,
-                applications.phone,
-                applications.comment,
-                applications.status,
-                applications.created_at,
-                courses.id AS course_id,
-                courses.name AS course_name
-             FROM applications
-             INNER JOIN courses
-                ON courses.id = applications.course_id
-             WHERE applications.user_id = :user_id
-             ORDER BY applications.created_at DESC'
+        $statement = Database::connection()->prepare(
+            self::SELECT . ' WHERE applications.user_id = :user_id
+             ORDER BY applications.created_at DESC, applications.id DESC'
         );
-
-        $statement->execute([
-            'user_id' => $userId,
-        ]);
+        $statement->execute(['user_id' => $userId]);
 
         return $statement->fetchAll();
     }
 
-    public static function all(array $filters = []): array {
-        $database = Database::connection();
+    /** Заявка, принадлежащая конкретному пользователю (для личного кабинета). */
+    public static function findForUser(int $id, int $userId): ?array {
+        $statement = Database::connection()->prepare(
+            self::SELECT . ' WHERE applications.id = :id AND applications.user_id = :user_id'
+        );
+        $statement->execute(['id' => $id, 'user_id' => $userId]);
 
+        return $statement->fetch() ?: null;
+    }
+
+    /** Список для админки. Фильтры: user_id, status_id, date_from, date_to. */
+    public static function all(array $filters = []): array {
         $conditions = [];
         $parameters = [];
 
-        if (
-            isset($filters['user_id'])
-            && $filters['user_id'] !== ''
-            && ctype_digit((string) $filters['user_id'])
-        ) {
+        if (!empty($filters['user_id'])) {
             $conditions[] = 'applications.user_id = :user_id';
             $parameters['user_id'] = (int) $filters['user_id'];
         }
 
-        if (
-            isset($filters['status'])
-            && $filters['status'] !== ''
-        ) {
-            $conditions[] = 'applications.status = :status';
-            $parameters['status'] = $filters['status'];
+        if (!empty($filters['status_id'])) {
+            $conditions[] = 'applications.status_id = :status_id';
+            $parameters['status_id'] = (int) $filters['status_id'];
         }
 
-        if (
-            isset($filters['date_from'])
-            && $filters['date_from'] !== ''
-        ) {
+        if (!empty($filters['date_from'])) {
             $conditions[] = 'applications.created_at >= :date_from';
             $parameters['date_from'] = $filters['date_from'] . ' 00:00:00';
         }
 
-        if (
-            isset($filters['date_to'])
-            && $filters['date_to'] !== ''
-        ) {
+        if (!empty($filters['date_to'])) {
             $conditions[] = 'applications.created_at < :date_to';
             $parameters['date_to'] = date(
                 'Y-m-d 00:00:00',
@@ -117,96 +130,59 @@ class Application {
             );
         }
 
-        $sql = '
-            SELECT
-                applications.id,
-                applications.user_id,
-                applications.name,
-                applications.phone,
-                applications.email,
-                applications.comment,
-                applications.status,
-                applications.created_at,
-                courses.name AS course_name,
-                users.name AS user_name,
-                users.email AS user_email
-            FROM applications
-            INNER JOIN courses
-                ON courses.id = applications.course_id
-            LEFT JOIN users
-                ON users.id = applications.user_id
-        ';
+        $sql = self::SELECT;
 
         if ($conditions !== []) {
             $sql .= ' WHERE ' . implode(' AND ', $conditions);
         }
 
-        $sql .= ' ORDER BY applications.created_at DESC';
+        $sql .= ' ORDER BY applications.created_at DESC, applications.id DESC';
 
-        $statement = $database->prepare($sql);
+        $statement = Database::connection()->prepare($sql);
         $statement->execute($parameters);
 
         return $statement->fetchAll();
     }
 
-    public static function find(int $id): ?array{
-        $database = Database::connection();
-
-        $statement = $database->prepare(
-            'SELECT
-                applications.id,
-                applications.course_id,
-                applications.user_id,
-                applications.name,
-                applications.phone,
-                applications.email,
-                applications.comment,
-                applications.status,
-                applications.created_at,
-                courses.name AS course_name
-             FROM applications
-             INNER JOIN courses
-                ON courses.id = applications.course_id
-             WHERE applications.id = :id'
+    public static function find(int $id): ?array {
+        $statement = Database::connection()->prepare(
+            self::SELECT . ' WHERE applications.id = :id'
         );
+        $statement->execute(['id' => $id]);
 
-        $statement->execute([
-            'id' => $id,
-        ]);
-
-        $application = $statement->fetch();
-
-        return $application ?: null;
+        return $statement->fetch() ?: null;
     }
 
-    public static function updateStatus(
-        int $id,
-        string $status
-    ): void {
-        $database = Database::connection();
-
-        $statement = $database->prepare(
-            'UPDATE applications
-             SET status = :status
-             WHERE id = :id'
-        );
-
-        $statement->execute([
-            'id' => $id,
-            'status' => $status,
-        ]);
+    public static function count(): int {
+        return (int) Database::connection()
+            ->query('SELECT COUNT(*) FROM applications')
+            ->fetchColumn();
     }
 
-    public static function delete(int $id): void{
-        $database = Database::connection();
+    /** Количество заявок по каждому статусу (для обзора в админке). */
+    public static function countByStatus(): array {
+        return Database::connection()->query(
+            'SELECT application_statuses.id, application_statuses.name, COUNT(applications.id) AS total
+             FROM application_statuses
+             LEFT JOIN applications ON applications.status_id = application_statuses.id
+             GROUP BY application_statuses.id, application_statuses.name, application_statuses.sort_order
+             ORDER BY application_statuses.sort_order ASC'
+        )->fetchAll();
+    }
 
-        $statement = $database->prepare(
-            'DELETE FROM applications
-             WHERE id = :id'
+    public static function updateStatus(int $id, int $statusId): void {
+        $statement = Database::connection()->prepare(
+            'UPDATE applications SET status_id = :status_id WHERE id = :id'
         );
 
-        $statement->execute([
-            'id' => $id,
-        ]);
+        $statement->execute(['id' => $id, 'status_id' => $statusId]);
+    }
+
+    public static function delete(int $id): void {
+        $statement = Database::connection()->prepare(
+            'DELETE FROM applications WHERE id = :id'
+        );
+
+        $statement->execute(['id' => $id]);
     }
 }

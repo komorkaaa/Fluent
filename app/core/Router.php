@@ -15,7 +15,17 @@ class Router
     }
 
     public function dispatch(string $method, string $uri): void {
-        $path = parse_url($uri, PHP_URL_PATH);
+        $path = parse_url($uri, PHP_URL_PATH) ?: '/';
+        $path = rawurldecode($path);
+
+        // /courses/ и /courses — один и тот же маршрут
+        if ($path !== '/') {
+            $path = rtrim($path, '/');
+        }
+
+        if ($method === 'HEAD') {
+            $method = 'GET';
+        }
 
         foreach ($this->routes[$method] ?? [] as $route => $handler) {
             $parameters = $this->matchRoute($route, $path);
@@ -28,21 +38,20 @@ class Router
             return;
         }
 
-        http_response_code(404);
-
-        $controller = new \App\Controllers\ErrorController();
-        $controller->notFound();
-        exit;
+        (new \App\Controllers\ErrorController())->notFound();
     }
 
     private function matchRoute(string $route, string $path): ?array {
-        $pattern = preg_replace(
+        // {id} — только число; остальные параметры — любой сегмент пути
+        $pattern = preg_replace_callback(
             '/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/',
-            '(?P<$1>[^/]+)',
+            static fn (array $m): string => $m[1] === 'id'
+                ? '(?P<id>\d{1,18})'
+                : '(?P<' . $m[1] . '>[^/]+)',
             $route
         );
 
-        $pattern = '#^' . $pattern . '$#';
+        $pattern = '#^' . $pattern . '$#u';
 
         if (!preg_match($pattern, $path, $matches)) {
             return null;

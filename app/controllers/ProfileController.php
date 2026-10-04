@@ -9,40 +9,18 @@ use App\Models\User;
 
 class ProfileController extends Controller {
     public function index(): void {
-        Auth::start();
+        $user = $this->requireAuth();
 
-        if (!Auth::check()) {
-            header('Location: /login');
-            exit;
-        }
-
-        $user = Auth::user();
-
-        $applications = Application::findByUserId(
-            (int) $user['id']
-        );
-
-        $this->view('profile/index', [
-            'title' => 'Личный кабинет — Fluent',
-            'user' => $user,
-            'applications' => $applications,
-        ]);
+        $this->renderProfile($user);
     }
 
     public function update(): void {
         $this->verifyCsrf();
 
-        Auth::start();
+        $user = $this->requireAuth();
 
-        if (!Auth::check()) {
-            header('Location: /login');
-            exit;
-        }
-
-        $user = Auth::user();
-
-        $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
+        $name = $this->input($_POST, 'name');
+        $email = mb_strtolower($this->input($_POST, 'email'));
 
         $errors = [];
 
@@ -58,42 +36,65 @@ class ProfileController extends Controller {
             $errors[] = 'Введите корректный email.';
         } elseif (mb_strlen($email) > 255) {
             $errors[] = 'Email не должен превышать 255 символов.';
+        } else {
+            $existingUser = User::findByEmail($email);
+
+            if (
+                $existingUser !== null &&
+                (int) $existingUser['id'] !== (int) $user['id']
+            ) {
+                $errors[] = 'Пользователь с таким email уже существует.';
+            }
         }
 
-        $existingUser = User::findByEmail($email);
+        if ($errors === []) {
+            try {
+                User::update((int) $user['id'], $name, $email);
+            } catch (\PDOException $exception) {
+                if ($exception->getCode() !== '23505') {
+                    throw $exception;
+                }
 
-        if (
-            $existingUser !== null &&
-            (int) $existingUser['id'] !== (int) $user['id']
-        ) {
-            $errors[] = 'Пользователь с таким email уже существует.';
+                $errors[] = 'Пользователь с таким email уже существует.';
+            }
         }
 
         if ($errors !== []) {
-            $applications = Application::findByUserId(
-                (int) $user['id']
-            );
-
-            $this->view('profile/index', [
-                'title' => 'Личный кабинет — Fluent',
-                'user' => $user,
-                'applications' => $applications,
-                'errors' => $errors,
-            ]);
+            $this->renderProfile($user, $errors, ['name' => $name, 'email' => $email]);
 
             return;
         }
 
-        User::update(
-            (int) $user['id'],
-            $name,
-            $email
-        );
-
         $_SESSION['user']['name'] = $name;
         $_SESSION['user']['email'] = $email;
 
-        header('Location: /profile');
-        exit;
+        $this->flash('success', 'Данные профиля сохранены.');
+        $this->redirect('/profile');
+    }
+
+    public function application(int $id): void {
+        $user = $this->requireAuth();
+
+        // Только собственные заявки: чужой id даёт 404, а не утечку данных
+        $application = Application::findForUser($id, (int) $user['id']);
+
+        if ($application === null) {
+            $this->abortNotFound('Заявка не найдена — Fluent');
+        }
+
+        $this->view('profile/application', [
+            'title' => 'Заявка №' . $application['id'] . ' — Fluent',
+            'application' => $application,
+        ]);
+    }
+
+    private function renderProfile(array $user, array $errors = [], array $old = []): void {
+        $this->view('profile/index', [
+            'title' => 'Личный кабинет — Fluent',
+            'user' => $user,
+            'applications' => Application::findByUserId((int) $user['id']),
+            'errors' => $errors,
+            'old' => $old,
+        ]);
     }
 }
